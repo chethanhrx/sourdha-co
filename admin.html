@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel — ದಿವ್ಯಚೇತನ ಸೌಹಾರ್ದ ಸಹಕಾರ ಸಂಘ</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Kannada:wght@400;600;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#C41E3A;--navy:#1A2A5A;--navy-dark:#0F1636;
+  --gold:#D4A852;--green:#10B981;--green-dark:#059669;
+  --amber:#D97706;--danger:#DC2626;
+  --bg:#F1F5F9;--surface:#fff;--border:#E2E8F0;
+  --text:#1E293B;--text2:#64748B;
+  --ff:'Source Sans 3',sans-serif;
+  --ff-kn:'Noto Sans Kannada',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--ff);background:var(--bg);color:var(--text);min-height:100vh}
+
+/* LOGIN */
+#loginScreen{position:fixed;inset:0;background:linear-gradient(135deg,#0F1636,#1A2A5A);display:flex;align-items:center;justify-content:center;z-index:9999}
+.login-card{background:#fff;border-radius:20px;padding:2.5rem;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.3);text-align:center}
+.login-logo{width:70px;height:70px;border-radius:50%;object-fit:cover;border:3px solid rgba(212,168,82,.5);margin:0 auto 1rem}
+.login-title{font-family:var(--ff-kn);font-size:18px;font-weight:700;color:var(--navy);margin-bottom:.25rem}
+.login-sub{font-size:13px;color:var(--text2);margin-bottom:1.5rem}
+.li{width:100%;padding:12px 14px;border:2px solid var(--border);border-radius:10px;font-family:var(--ff);font-size:15px;outline:none;margin-bottom:1rem;transition:.2s}
+.li:focus{border-color:var(--primary)}
+.lb{width:100%;padding:13px;background:linear-gradient(135deg,#C41E3A,#D4A852);border:none;color:#fff;border-radius:50px;font-size:16px;font-weight:700;cursor:pointer;font-family:var(--ff);transition:.3s}
+.lb:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(196,30,58,.4)}
+.lerr{color:var(--danger);font-size:13px;margin-top:.5rem;display:none}
+.lerr.show{display:block}
+
+/* LAYOUT */
+#adminApp{display:none;min-height:100vh}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:240px;background:var(--navy-dark);color:#fff;display:flex;flex-direction:column;z-index:100;overflow-y:auto}
+.sb-brand{padding:1.25rem 1rem;border-bottom:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:10px}
+.sb-brand img{width:38px;height:38px;border-radius:50%;object-fit:cover;border:1px solid rgba(212,168,82,.4)}
+.sb-brand-txt{font-family:var(--ff-kn);font-size:13px;font-weight:700;line-height:1.3}
+.sb-brand-sub{font-size:10px;opacity:.6;font-family:var(--ff)}
+.sb-nav{flex:1;padding:1rem 0}
+.sb-section{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.35);padding:.5rem 1rem .25rem}
+.sb-link{display:flex;align-items:center;gap:10px;padding:.7rem 1rem;color:rgba(255,255,255,.7);text-decoration:none;font-size:14px;font-weight:500;transition:.2s;cursor:pointer;border:none;background:none;width:100%;text-align:left}
+.sb-link:hover{background:rgba(255,255,255,.07);color:#fff}
+.sb-link.active{background:rgba(196,30,58,.25);color:#fff;border-right:3px solid var(--primary)}
+.sb-link .icon{font-size:18px;flex-shrink:0}
+.sb-footer{padding:1rem;border-top:1px solid rgba(255,255,255,.1)}
+.logout-btn{width:100%;padding:10px;background:rgba(220,38,38,.2);border:1px solid rgba(220,38,38,.3);color:#fca5a5;border-radius:8px;font-family:var(--ff);font-size:14px;cursor:pointer;transition:.2s}
+.logout-btn:hover{background:rgba(220,38,38,.35)}
+
+/* MAIN */
+.main{margin-left:240px;padding:2rem;min-height:100vh}
+.page-header{margin-bottom:2rem}
+.page-title{font-size:26px;font-weight:700;color:var(--navy);margin-bottom:.25rem}
+.page-sub{color:var(--text2);font-size:15px}
+.tab-content{display:none}
+.tab-content.active{display:block}
+
+/* CARDS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.25rem;margin-bottom:2rem}
+.stat-card{background:#fff;border-radius:14px;padding:1.25rem;box-shadow:0 2px 8px rgba(0,0,0,.06);border:1px solid var(--border);position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;right:0;width:60px;height:60px;border-radius:0 0 0 60px;opacity:.08}
+.stat-card:nth-child(1)::before{background:var(--primary)}
+.stat-card:nth-child(2)::before{background:var(--gold)}
+.stat-card:nth-child(3)::before{background:var(--navy)}
+.stat-card:nth-child(4)::before{background:var(--green)}
+.stat-num{font-size:28px;font-weight:700;color:var(--navy);margin-bottom:.2rem;font-family:'Source Sans 3',sans-serif}
+.stat-label{font-size:13px;color:var(--text2);font-family:var(--ff-kn)}
+.stat-icon{font-size:2rem;margin-bottom:.5rem}
+.stat-trend{font-size:12px;margin-top:.4rem;font-weight:600}
+.stat-trend.up{color:var(--green-dark)}
+.stat-trend.dw{color:var(--danger)}
+
+/* PANEL */
+.panel{background:#fff;border-radius:14px;padding:1.5rem;box-shadow:0 2px 8px rgba(0,0,0,.06);border:1px solid var(--border);margin-bottom:1.5rem}
+.panel-title{font-size:17px;font-weight:700;color:var(--navy);margin-bottom:1.25rem;display:flex;align-items:center;gap:8px;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
+
+/* FORM ELEMENTS */
+.fg{margin-bottom:1rem}
+.fl{display:block;font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.7px;margin-bottom:6px}
+.fi,.fs,.ft{width:100%;padding:10px 13px;border:2px solid var(--border);border-radius:9px;font-family:var(--ff);font-size:14px;color:var(--text);transition:.2s;outline:none;background:var(--bg)}
+.fi:focus,.fs:focus,.ft:focus{border-color:var(--primary);background:#fff}
+.fs{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2364748B' stroke-width='2' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:30px}
+.ft{resize:vertical;min-height:90px}
+.btn-primary{background:linear-gradient(135deg,#C41E3A,#D4A852);border:none;color:#fff;padding:10px 22px;border-radius:50px;font-family:var(--ff);font-size:14px;font-weight:600;cursor:pointer;transition:.3s}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(196,30,58,.35)}
+.btn-secondary{background:none;border:2px solid var(--border);color:var(--text2);padding:9px 20px;border-radius:50px;font-family:var(--ff);font-size:14px;font-weight:600;cursor:pointer;transition:.3s}
+.btn-secondary:hover{border-color:var(--primary);color:var(--primary)}
+.btn-danger{background:none;border:2px solid rgba(220,38,38,.3);color:var(--danger);padding:7px 15px;border-radius:50px;font-family:var(--ff);font-size:13px;font-weight:600;cursor:pointer;transition:.3s}
+.btn-danger:hover{background:var(--danger);color:#fff}
+.btn-sm{padding:6px 14px;font-size:13px}
+
+/* TABLE */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{padding:10px 12px;text-align:left;background:var(--bg);font-weight:600;color:var(--text2);font-size:12px;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid var(--border)}
+td{padding:10px 12px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
+tr:hover td{background:rgba(26,42,90,.02)}
+.badge{padding:3px 10px;border-radius:50px;font-size:12px;font-weight:600}
+.badge.success{background:rgba(16,185,129,.12);color:var(--green-dark)}
+.badge.warning{background:rgba(217,119,6,.12);color:var(--amber)}
+.badge.danger{background:rgba(220,38,38,.1);color:var(--danger)}
+.badge.info{background:rgba(14,165,233,.1);color:#0284C7}
+
+/* RATE EDITOR */
+.rate-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+.rate-item{background:var(--bg);border-radius:12px;padding:1rem;border:1px solid var(--border)}
+.rate-scheme{font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.4rem;font-family:var(--ff-kn)}
+.rate-tenure{font-size:13px;color:var(--text);margin-bottom:.5rem}
+.rate-input-wrap{display:flex;align-items:center;gap:.4rem}
+.rate-inp{width:80px;padding:7px 10px;border:2px solid var(--border);border-radius:8px;font-family:var(--ff);font-size:15px;font-weight:700;color:var(--primary);outline:none;transition:.2s}
+.rate-inp:focus{border-color:var(--primary)}
+.rate-pct{font-size:13px;color:var(--text2)}
+
+/* NOTIFICATION BUILDER */
+.notif-preview{background:var(--navy-dark);border-radius:14px;padding:1.25rem;color:#fff;margin-top:1rem}
+.np-title{font-size:12px;color:rgba(255,255,255,.5);margin-bottom:.75rem;text-transform:uppercase;letter-spacing:.7px}
+.np-item{background:rgba(255,255,255,.07);border-radius:10px;padding:.85rem;display:flex;gap:10px;align-items:flex-start;position:relative;overflow:hidden;margin-bottom:.5rem}
+.np-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px}
+.np-item.success::before{background:var(--green)}
+.np-item.alert::before{background:var(--amber)}
+.np-item.info::before{background:#0EA5E9}
+.np-item.danger::before{background:var(--danger)}
+.np-icon{font-size:18px}
+.np-body .np-ttl{font-weight:700;font-size:13px;margin-bottom:2px}
+.np-body .np-msg{font-size:12px;opacity:.75}
+
+/* TOGGLE */
+.toggle-wrap{display:flex;align-items:center;gap:.75rem}
+.toggle{position:relative;width:46px;height:24px}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:var(--border);border-radius:24px;cursor:pointer;transition:.3s}
+.toggle-slider::before{content:'';position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s}
+.toggle input:checked + .toggle-slider{background:var(--green)}
+.toggle input:checked + .toggle-slider::before{transform:translateX(22px)}
+.toggle-label{font-size:14px;color:var(--text2);font-weight:500}
+
+/* RESPONSIVE */
+@media(max-width:900px){.stats-grid{grid-template-columns:1fr 1fr}.rate-grid{grid-template-columns:1fr 1fr}.grid2{grid-template-columns:1fr}}
+@media(max-width:768px){.sidebar{width:200px}.main{margin-left:200px}}
+@media(max-width:600px){.sidebar{position:static;width:100%}.main{margin-left:0}.stats-grid{grid-template-columns:1fr}.rate-grid{grid-template-columns:1fr}}
+
+/* ALERT */
+.alert{padding:.75rem 1rem;border-radius:10px;font-size:14px;margin-bottom:1rem;display:none}
+.alert.show{display:block}
+.alert.ok{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);color:var(--green-dark)}
+.alert.err{background:rgba(220,38,38,.08);border:1px solid rgba(220,38,38,.25);color:var(--danger)}
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen">
+  <div class="login-card">
+    <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCABkAGQDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwDyue1n0VtT08K5miQx71/gAJLkfXir/wAP/EM3h+znSAgtdWbpID2DV71P8LPsN9q+q6pc28rn7TPe/McBcEoAK+b7XT7rUJETTraaSRrfITHJGea+MrQnGHJI8iUZfCdroN5aaovm6hoVlqVxIGCWkuQqR4+8uD1GM1xOuW+iWWn3Bt9N1S7vN5LSTSiOGEE8BVA3H8ame7n0y8EodkmykPBwVAHzCta411tR8QanqzpBC0IiSFJIwYyBhTkevOc1WFbitUa05cytIqeErrx3qWmR21ra32s6XZoxjs2kcW0Q6nIBAP4mu58La54m1uJtAtdH0SG4lUbI7eARw2qDq8jDr+JNcbqF/eXN0tn9tuFxKVkRpibdB6qi4GMc+tb0mqR6ParpuiNItrIoEtyCVa5b+JvXb2C16anGKTkfa5Lw57dKpUX/AAPU7rSNZ8O+C5hJYxw6rrRbbd6hNwEz1EYHCqOmRXIXN/rviHW7ltPt57uSVtrlWLKq5/vGtHwv4UGo2a6lrdwbGz3EtGyhTIgHBJHIr1TwlrfgqxWKy02FHAyA/l/ukPY/7WfU10qn7VpzfL5H1irwwS5MDDnmvtdEcZoXww1i/tUW9uJUjLbmjtjwB2BaujHgLSLSJ3u2ikYjdnDSscDrxxmuhuPiItlfxW8scSxupAeYhYiRnGPTNV/G2vPq8dnZG7jRdhkX+ykaQDPGGK8fhWk4QhH3Fc4K0cxr1YrG1GovfWxwmsyaNY3AB0zUH3HCuUCKSOp/+vXP6t4h8NW1haXCWU+6WdopklY5jAH3gRwRWxcaX43JmhsrS4aB1ZA17MACp7hT0rmb34feKJl23F5aRJnhOWAOOtcFZVtbRR2PD5Jh9Ks7v1bHafrOhT2oluL63tHYn9185wM8Hp3orCm+GusK+G1O3Jx2jNFYckuyOf2mSfyo+69e0ez1jSrvT7lAI7qNo5GXgkEYPNefaJ8JtI8P+J4dRs5N0JsxZpb+WMRgHls/SvRPD8F9b6Naw6ldfarwRgzS4wGY8nHtV6voKmHp1dZI/OHFS1Z8K/H7wDceGPHJXzIjZ3MrT2wyS2wMAc++a4jW7C2l1TzNMlmFo/zSLOAGLHnGASMZr6D/AGy1A8SaAR1NnL/6GK8t0XwtbalotteJdziaRpPNQRgqgU4HOc818ripyw9aUIbI/Xcj4U4fhk9DMMenebezdr3dtF5I5WN5dhMojaZm3O4GM+g+la2hajbWM5vLuBrq4QAQJgeUmPbvW3P4Ot4WVTqEpyM58sYH61q6T8NY79RM2rG2t1OHkkjH6DPNcyx1S97n0063DNOHK5SS9Jf5GRqfieyvoF85dQlnEYAZmVVVvYA/d9jS2/jFxF9l8yWxtnYNL9mgVmYgY6EgV04+Gvhl53gh8T3crohbItkCnj1LVTPw3sZDG1tqV6Yivzu8Cjn0Xnml/aE4u7ZdLGcNunyU20vSS/Q0ND8XfCy0MUuqaJ4i1e4j6SXflOAPQLvxiu1s/jf8O7WLyofD+vRoOixxQKP0euF0n4VWN3OqTaveQI3drdRx68mtm6+CWkx2jTp4qYlSVKNGgOfTrXR/bta3T7jzMTheFKk/3tSbfrP/ACOmHx1+HQwD4a11+c/MsX/xyqGq/HbwaYCNN8GXLSg/L9oZAMd+hOOK4fVfhhb2Jg3apP8AvBkgohOPbBqGx+GsV2t20WoXTLBGXBEAOcdjzUPPKr6/gRHJuD/ibl83I3rv41Wcku6LwrAi4GQSDzRXND4byOqtHd3OCP4oMUVH9qVe/wCBr/ZvB3n98j648JaLpWlNKLK8vr2fGJJrq6eZj+ZwPwFL4s8ZeHvC4UazfrA7RmRY1Us5UdTgdqxYRc+ErK3i1DX7Ib5BHGjhUaVie5P557V5H8UfHHw5u/iJZ3euWviCfaVsrWdI9ltKu752UHl15xu74r6rEYpUY2h8XY/CL6WWjOP/AGivHnh7x1rWl3Hh6eWeG0gkjkd4yoLFgRjPWm/Dd7aHwXNKVZ7ozOqDsF//AF1kfGvTNF0fxb/Z+hRCO1iQ4HQ5JzyMV13wus1Pw1a6leMRvcyRoNw3h8jBA718ljqvtKkpPqfseKlycGYR3+3+szLkBZgpcPz8xJxjNaVrbyIywX6yrA6tJGVONxHTBPb1qk72VneEbJLlQx3KV/TNa9r4iihSNU0NXETYUyksIhnoM9K4baas+e9vzJSUGyTS9FvLueFdPV7syKCxSMkKfQ5rtbTwX4kukSN2trVCuHZuSec5A7H3rB/4WXf2luEjsY0OBgZwP0FPT4n69vBjhtkQqeWBbJ7VpF0I76nPUr46V1TgkdrafDffCE1HWLm4AO4Kny7fYHrW1ZeBtItCxjtg5YYJkYt/OvMf+Fn+KygxJbqhbG/yRkH0o1D4keJpZUSO4eHjJKxhd/Hb2qvb0Y9DllhcxqfFI9cTwxp6KojsrZAOB8gNEmiJGuFNtEp9sV81eIvi/qqxG0tdWvdRu1OHMUmyJD3Bcdceig/hWAl18T/FlvDPDfXYt5ZHCeQ4hUbQCxMsh+6ARlsgeuOK6Kacto/16HbhOFcyxMOfmUYfzSdo/e9/lc+pJ7KGOTa17aA4/vCivia8juPtUi3V3dSzKxV2a7d+QcHnccj6cUUrU/P+vmfRx8Mca1f20fvl/kfV118APDMsqXt34m8QXF/EhVbme834OOuCD+VeZ/HL4X6hpHhWx1y68S3viFNHfyog5I+zxt0IHfBxXBt4Z+M99ptvq+naZ4mS2kXeN14XY+hCk5pIdP8AiX4j1jTdJ8Rz66yh1HkX9vKLYnPRyg6H1r3uenNWhGzPxinWqctlBJFDxfrEuvaouqXN611cyxKsuY9oUqABj14rpvB8klp4ftpVLoLiSaMNImUGOpU+oro/2ldFt9C/4RWyi0vT9NlFhJ50VkCY928dCRk/U1t+CtF/tT9nNbmGPdc2N9POmBk4DAMB+H8q8fFUnCtKPb/gH7TjOVcF4O6+3+sznt2oWttBqDyxTeYTjYw3qR3I7Vs2t/8A2pbFGvlhLsHk8/8AdiT/ABGa5O2luIYluXjPlyPyM5zjr/8AqrpP7Fg1zSorqwuXnaMFTEnLR/QdcV5koNPXVHhRqJRtCVjoYPCGp3iq8L2txEVAXMgOB6Vp2fw61YpxZ245H/LQdK4I2/ibRreKW0vJoo2yVjWTnj1Wuh0v4ieMtK8pJo1ugw4VoySRj2qlCknqc9Svj4p8lmdpfeDLW10J7jWY7DT7S1jL3Nw82FCLyXY9BivHL221D4mfbLfw1e29npVsPKggmkxdagRjllHzRRHIABxksoOSdqx/EH4h+IPipqdl4PsIora0+0hDGjNi9uM/KGOPuqeAOm7k/dBqr4H8RWfhW1vdA8T6Ibdd63E0Zt8S3hVsiKRmBwuAQuBt5JOCQy+jRpUYyTkvn/XU+pyPJcbLCfW6utR2cYb+7f4mm9U+i2tq97rovDnw98MaZ4Ui1q/a21GwYFLy+m82GO152BYYxgsQxGWOTgPhQQM0fEnxN0W2mlNnBfa3cxyLH9ov7oiz8qNfLJiiADIJY+W5GGOecCvJdd1uRmawsxOLYzPNb2PnM8duGPX8sDIGTiscW4nIlupPtLHlc/cH+6vT8Tk+9fbcMcI5hn+uHSp01vJ639Fu+ur031voPibiPLsjquONnLEVtbQT5VFPW0mtE9rqO6teNtXevdZ06W7mliMcaO7MscKs6ICc7QeeB060VCOBgcUV+gx8GsHb3sTK/oj5N+NOaJ+7h6dvPmf43Nz4Pa74r0zxEtzpnjCDTzZEO9tql40UMw7oQSRXuWhftS6V9saz1Xw1ILmNirSafJ5yN6lQQCRXmOiaz4G8La+2m+JvDVhrem3EIljvI03SqGGdh5wxGaSXwxpXj7W2X4ReEb3RjbsDJqF3qAiRQf7qEk/lmvyWjWm0nB79ND86cXGVotr8jS+N3xL0f4kaxY3GkRXUa2ELwyCePYdzMG4H0Fd38CfHtrpHglPD02jXV5unlZnjIwQx6Y615P4+8D654MuLFfEGsQaleX0BkLRR42BTtwT/ABH3r3P9nZ7C0+G0VyLeE3rXU4Mm0FyARgZrxsXzPEyvv/wEfsWYXXAuEvL7X6zPPPEVtcaL4gE8mmTWUErM9uko+8M5Ge1amk2kiWUuvaFevFMrLmAL19c+mK7X4h6ZrHid4ljt/MSMnG7rz6V5zaSav4Z1cgFo5o2xJHJ91x6GuGaT0Ph6GO54pSPQ/Cvj/SLqUWvieyjgmHy+ayZVvf2rU+MF94c0T4Z3niDTFga98tbTTnif7ssnyqeP7o3P9FrBsLfwv45Pllv7N1deGTHDcenevOPj5pNx4euvDmhySloRDNcsEf5JGDBA2PozDmopaytKJ6+UYOGOx9LDwm1zSV15bu3yuM+ClhbJbyywtINUkuEsbD7PEJZirqfOLBmACFMKWyCNxII5zhfGrX9+tnSLaO0+y6M8lhYpbhdjHzCSQwUEqWyec4GeTyT6h4VuNOtvAc17o5tba3isZtRa1umivYoZlJVEAYhi7A9G4BBIHOK+c7s+ZqoQ9II92P8AaYkfoAfzr7Hh3J/7WzDD4BvSbvJr+Vav77b+h+g51nP9m4fGZpFWlTtCCfST91eXurW13vKzszsvglpr/wDCW/2mszC505BcxTbHY/aSflcBfv7Qrkw9XiEoQFlAqj8RdGh0XxVOLKFYdMvybuyjVw6whsM8AYcMELfKw4aNomHDVpfCO6t4dZ1G0nMavdWyeUWKgko5JUEnPdW2hXztzhSquPcPB3w/0X4haTqVhrrSNHH/AKqWB8S282TiRG555bIOQdzZzuYn9SxeazyHiGbhG1OKjHlX8nKrW9N1537n8+cjxlDmnK8m223u3fVv1PlyivUfFXwH8e6NrU1jp8EetWi8xXkcMke9T03KqsA3rzRX38ONMllFP21v+3Zf5HmPA10/h/I47xNYwp4f0+FY1MjW4WRgRuDdRgda4Z59Rs75mt7u607B2yMssgXPuRXR6jqUL6fBplpZtLqjSGSW4LE4XHCgdhitzRfEOpx+FtXg0h7N57i3/wBM8+BG8yEDb8oYfeHqMGv5WoT5H5HsRlGotTm9Lu9QukcX+sPqZQ4jZpXfYD2+avQfBfiXVtH02OOzmURJIzbN3cnnivMfDDFkuMtnDAdMDgV6n4RudDg8PQjUNKlmkMzlpkcZZc9Me1cOJl++bZ+tZokuBMIv7/61DvtH+JPiK5TyYre3dx2IOT+VbN7p2v8AitIpdQsIIJV+7IB8wHv6is3wz4u8DaXEWtdOvIZSAG3ru/rWhN8RopJNljNGq4OPlINczSluflcZRjsYWr+GNV0mdZLq3kXYf3VxCTlT6gj+Vef/ABc1fUtS8SaUdQuI7n7Np5SFyvJHmkncPXpXqC/EHVQ5DeTcRHgrIvBrivjlHp99ZaD4isbZIJGeazuVToCQHQ/+OPTpwkm9dD7PgvFqnnmGdTu196aX4s6HSZNMm8F32rWelGaeDSIblIo9OZU+1oF86c7WX5OCrEAL35rw/wARazc674mvL+8jgSbyoIsQptG1UwCeSSeuSSSa62y8eazaWC2qQac7rYPp63D22ZBAwAKk5w3AAG4HGMjnJPB3qmHVEcjCzR7Poy5IH5E/lX6P4dZhSpcQUFJ2UlKPzadvveh9n4gZDXjkWIqyV+WcZLW75fhfy2f3lmyurmxvYL6yuJLe5gcPFLGxUqe/IIOCMgjuCRX0V8EfilZy35a6jjtrwxhbq3VyARkfvI927cMkAfOG5ICMcV830DIdHVmR0bcjoxVkPqpHIPuK/d+I+FqGcx50+Wotn38n5fivwP57wuLlQdt0fo/p97a6hbC4tZBImdreqsOqsOzDuDyOhor4IsviH4jtbZLZ5tNvhEAiNeaekzoo6IDwAo9AB1J6kklfmM+CswhJxc6en97/AIB6yx9Nq9n9xjaxptrbwapcW4aJ4DAFKt13ths966ewjh0bUIktbeJ40yhSVdwZdnQ+o5oor8aqP3F/XY54t+6cna2sEELSwpsM0shYA8DB4ArufBOiWuoacs881wCJGG1HAH8qKKmf8Vn7Rmv/ACQ2E/x/rM9T8O+E9AntxG+npkH74Y7vzJrZn8D6DFukWOfJGeZO/wCVFFc8T8ujsYtzpWnxTRW62qFGJySTmqnxI0LTU+E2uyrCQ9tEt1Ec9JEdcH9SD7E0UVNBt1F6nVl0pRxNJp6qUfzRg/s2eCdD8Y3+tf2wlx5lhHBLayQy7TG5ZjnHIP3R1BFbP7XvgbQdH8My+KrRLg6tfao0ksrycLiN2CqoAAAKDtnk5JzRRX0WXrkowqR0kmnfrdS3v3P1/iGvVlnlSjKTcHFq19LOnFtW2s3q1tc+eIyWjVj1IBp1FFf2Ktj+ZT6X/Z5OrxfCywNl4hvrKJ7i5byYre2ZQfOcHl4mY5x3J/LAooor+aMzS+u1v8cvzZ9XS/hx9Ef/2Q==" alt="Logo" class="login-logo">
+    <div class="login-title">ದಿವ್ಯಚೇತನ ಸೌಹಾರ್ದ ಸಹಕಾರ ಸಂಘ</div>
+    <div class="login-sub">Admin Panel — Secure Login</div>
+    <input type="text" class="li" id="adminUser" placeholder="Username">
+    <input type="password" class="li" id="adminPass" placeholder="Password">
+    <button class="lb" onclick="doLogin()">🔐 Login</button>
+    <div class="lerr" id="loginErr">❌ Invalid username or password</div>
+    <div style="margin-top:1rem;font-size:12px;color:#94a3b8">Default: admin / divya2012</div>
+  </div>
+</div>
+
+<!-- ADMIN APP -->
+<div id="adminApp">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sb-brand">
+      <img src="data:image/jpeg;base64,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" alt="Logo">
+      <div>
+        <div class="sb-brand-txt">ದಿವ್ಯಚೇತನ Admin</div>
+        <div class="sb-brand-sub">Cooperative Society</div>
+      </div>
+    </div>
+    <nav class="sb-nav">
+      <div class="sb-section">Main</div>
+      <button class="sb-link active" onclick="showTab('dashboard',this)"><span class="icon">📊</span> Dashboard</button>
+      <button class="sb-link" onclick="showTab('rates',this)"><span class="icon">💹</span> Interest Rates</button>
+      <button class="sb-link" onclick="showTab('notifications',this)"><span class="icon">🔔</span> Notifications</button>
+      <button class="sb-link" onclick="showTab('members',this)"><span class="icon">👥</span> Members</button>
+      <div class="sb-section">Content</div>
+      <button class="sb-link" onclick="showTab('schemes',this)"><span class="icon">📋</span> Scheme Details</button>
+      <button class="sb-link" onclick="showTab('announcements',this)"><span class="icon">📢</span> Announcements</button>
+      <button class="sb-link" onclick="showTab('settings',this)"><span class="icon">⚙️</span> Settings</button>
+      <div class="sb-section">Quick Access</div>
+      <a href="index.html" target="_blank" class="sb-link"><span class="icon">🌐</span> View Website</a>
+    </nav>
+    <div class="sb-footer">
+      <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="main">
+
+    <!-- DASHBOARD -->
+    <div id="tab-dashboard" class="tab-content active">
+      <div class="page-header">
+        <div class="page-title">📊 Dashboard</div>
+        <div class="page-sub">ದಿವ್ಯಚೇತನ ಸೌಹಾರ್ದ ಸಹಕಾರ ಸಂಘ — 2024-25 Overview</div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-num">1,644</div><div class="stat-label">ಒಟ್ಟು ಸದಸ್ಯರು</div><div class="stat-trend up">↑ +158 from 2023-24</div></div>
+        <div class="stat-card"><div class="stat-icon">🏦</div><div class="stat-num">₹7.24Cr</div><div class="stat-label">ಒಟ್ಟು ಠೇವಣಿ</div><div class="stat-trend up">↑ from ₹6.12Cr</div></div>
+        <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-num">₹7.37Cr</div><div class="stat-label">ಒಟ್ಟು ಸಾಲ</div><div class="stat-trend up">↑ from ₹6.58Cr</div></div>
+        <div class="stat-card"><div class="stat-icon">📈</div><div class="stat-num">₹12.76L</div><div class="stat-label">ನಿವ್ವಳ ಲಾಭ 2024-25</div><div class="stat-trend up">↑ Net Profit</div></div>
+      </div>
+      <div class="grid2">
+        <div class="panel">
+          <div class="panel-title">📥 Deposit Breakdown (2024-25)</div>
+          <table><thead><tr><th>ಠೇವಣಿ ವಿಧ</th><th>2023-24</th><th>2024-25</th></tr></thead>
+          <tbody>
+            <tr><td>ನಿಗದಿತ ಠೇವಣಿ (FD)</td><td>₹5,19,39,459</td><td>₹6,04,39,677</td></tr>
+            <tr><td>ನಗದು ಪತ್ರ ಠೇವಣಿ</td><td>₹1,13,367</td><td>₹14,58,135</td></tr>
+            <tr><td>ಪಿಗ್ಮಿ ಠೇವಣಿ</td><td>₹60,44,965</td><td>₹62,26,545</td></tr>
+            <tr><td>ಉಳಿತಾಯ ಖಾತೆ</td><td>₹14,06,786</td><td>₹18,64,079</td></tr>
+            <tr><td>ಕಟ್ಟಡ ನಿಧಿ</td><td>₹13,42,500</td><td>₹18,19,294</td></tr>
+            <tr><td>ಆವರ್ತಕ ಠೇವಣಿ (RD)</td><td>—</td><td>₹1,47,500</td></tr>
+            <tr style="font-weight:700;background:rgba(26,42,90,.04)"><td>ಒಟ್ಟು</td><td>₹6,12,77,690</td><td>₹7,24,33,190</td></tr>
+          </tbody></table>
+        </div>
+        <div class="panel">
+          <div class="panel-title">💳 Loan Portfolio (2024-25)</div>
+          <table><thead><tr><th>ಸಾಲ ವಿಧ</th><th>ಮೊತ್ತ</th></tr></thead>
+          <tbody>
+            <tr><td>ಜಾಮೀನು ಸಾಲ</td><td>₹1,90,42,199</td></tr>
+            <tr><td>ಸ್ಥಿರಾಸ್ತಿ ಆಧಾರ ಸಾಲ</td><td>₹2,80,25,540</td></tr>
+            <tr><td>ಬಂಗಾರ ಅಡಮಾನ</td><td>₹57,17,675</td></tr>
+            <tr><td>ವಾಹನ ಸಾಲ</td><td>₹1,22,14,955</td></tr>
+            <tr><td>ವ್ಯವಹಾರ ಸಾಲ</td><td>₹65,91,179</td></tr>
+            <tr><td>ಕಂಪ್ಯೂಟರ್ ಸಾಲ</td><td>₹6,21,085</td></tr>
+            <tr><td>ಸೋಲಾರ್ & ಬ್ಯಾಟರಿ</td><td>₹1,42,294</td></tr>
+            <tr style="font-weight:700;background:rgba(26,42,90,.04)"><td>ಒಟ್ಟು</td><td>₹7,37,77,589</td></tr>
+          </tbody></table>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">💸 2024-25 Profit Distribution</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.75rem">
+          <div style="text-align:center;padding:1rem;background:var(--bg);border-radius:10px;border:1px solid var(--border)"><div style="font-weight:700;color:var(--primary);font-size:18px">₹3,19,019</div><div style="font-size:12px;color:var(--text2)">ಮೀಸಲು ನಿಧಿ (25%)</div></div>
+          <div style="text-align:center;padding:1rem;background:var(--bg);border-radius:10px;border:1px solid var(--border)"><div style="font-weight:700;color:var(--primary);font-size:18px">₹2,55,215</div><div style="font-size:12px;color:var(--text2)">ಕಾರ್ಯಾಚರಣೆ ನಿಧಿ (20%)</div></div>
+          <div style="text-align:center;padding:1rem;background:var(--bg);border-radius:10px;border:1px solid var(--border)"><div style="font-weight:700;color:var(--primary);font-size:18px">₹63,804</div><div style="font-size:12px;color:var(--text2)">ಸಾಮಾನ್ಯ ಕ್ಷೇಮ ನಿಧಿ (5%)</div></div>
+          <div style="text-align:center;padding:1rem;background:var(--bg);border-radius:10px;border:1px solid var(--border)"><div style="font-weight:700;color:var(--primary);font-size:18px">₹4,17,008</div><div style="font-size:12px;color:var(--text2)">ಡಿವಿಡೆಂಟ್ (8%)</div></div>
+          <div style="text-align:center;padding:1rem;background:var(--bg);border-radius:10px;border:1px solid var(--border)"><div style="font-weight:700;color:var(--primary);font-size:18px">₹83,000</div><div style="font-size:12px;color:var(--text2)">ಸಿಬ್ಬಂದಿ ಬೋನಸ್</div></div>
+          <div style="text-align:center;padding:1rem;background:var(--bg);border-radius:10px;border:1px solid var(--border)"><div style="font-weight:700;color:var(--primary);font-size:18px">₹20,000</div><div style="font-size:12px;color:var(--text2)">ವಿದ್ಯಾರ್ಥಿ ಪ್ರೋತ್ಸಾಹ</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INTEREST RATES EDITOR -->
+    <div id="tab-rates" class="tab-content">
+      <div class="page-header"><div class="page-title">💹 Interest Rate Manager</div><div class="page-sub">Update live interest rates shown on the website</div></div>
+      <div class="alert" id="rateAlert"></div>
+      <div class="panel">
+        <div class="panel-title">🏦 Fixed Deposit (FD) Rates</div>
+        <div class="rate-grid" id="fdRates">
+          <div class="rate-item"><div class="rate-scheme">FD — ಸಾಮಾನ್ಯ / General</div>
+            <div class="rate-tenure">3 ವರ್ಷ ಮತ್ತು ಮೇಲ್ಪಟ್ಟು (3yr+)</div>
+            <div class="rate-input-wrap"><input type="number" class="rate-inp" id="fd_3g" value="10" step="0.25" min="0" max="20"><span class="rate-pct">% p.a.</span></div>
+          </div>
+          <div class="rate-item"><div class="rate-scheme">FD — ಹಿರಿಯ ನಾಗರಿಕ / Senior</div>
+            <div class="rate-tenure">3 ವರ್ಷ ಮತ್ತು ಮೇಲ್ಪಟ್ಟು (3yr+)</div>
+            <div class="rate-input-wrap"><input type="number" class="rate-inp" id="fd_3s" value="10.5" step="0.25" min="0" max="20"><span class="rate-pct">% p.a.</span></div>
+          </div>
+          <div class="rate-item"><div class="rate-scheme">FD — ಸಾಮಾನ್ಯ / General</div>
+            <div class="rate-tenure">2 ವರ್ಷ ಮತ್ತು ಮೇಲ್ಪಟ್ಟು (2yr+)</div>
+            <div class="rate-input-wrap"><input type="number" class="rate-inp" id="fd_2g" value="9" step="0.25" min="0" max="20"><span class="rate-pct">% p.a.</span></div>
+          </div>
+          <div class="rate-item"><div class="rate-scheme">FD — ಹಿರಿಯ ನಾಗರಿಕ / Senior</div>
+            <div class="rate-tenure">2 ವರ್ಷ ಮತ್ತು ಮೇಲ್ಪಟ್ಟು (2yr+)</div>
+            <div class="rate-input-wrap"><input type="number" class="rate-inp" id="fd_2s" value="9.5" step="0.25" min="0" max="20"><span class="rate-pct">% p.a.</span></div>
+          </div>
+          <div class="rate-item"><div class="rate-scheme">FD — ಸಾಮಾನ್ಯ / General</div>
+            <div class="rate-tenure">1 ವರ್ಷ ಮತ್ತು ಮೇಲ್ಪಟ್ಟು (1yr+)</div>
+            <div class="rate-input-wrap"><input type="number" class="rate-inp" id="fd_1g" value="8" step="0.25" min="0" max="20"><span class="rate-pct">% p.a.</span></div>
+          </div>
+          <div class="rate-item"><div class="rate-scheme">FD — ಹಿರಿಯ ನಾಗರಿಕ / Senior</div>
+            <div class="rate-tenure">1 ವರ್ಷ ಮತ್ತು ಮೇಲ್ಪಟ್ಟು (1yr+)</div>
+            <div class="rate-input-wrap"><input type="number" class="rate-inp" id="fd_1s" value="8.5" step="0.25" min="0" max="20"><span class="rate-pct">% p.a.</span></div>
+          </div>
+          <div class="rate-item"><div class="rate-scheme">FD — ಸಾಮಾನ್ಯ / General</div>
+            <div class="rate-tenure">1 ವರ್ಷಕ್ಕಿಂತ ಕಡಿಮೆ (&lt;1yr)</div>
+            <div class="rate-input-wrap"><input type="number" class="rate-inp" id="fd_0g" value="7" step="0.25" min="0" max="20"><span class="rate-pct">% p.a.</span></div>
+          </div>
+          <div class="rate-item"><div class="rate-scheme">FD — ಹಿರಿಯ ನಾಗರಿಕ / Senior</div>
+            <div class="rate-tenure">1 ವರ್ಷಕ್ಕಿಂತ ಕಡಿಮೆ (&lt;1yr)</div>
+            <div class="rate-input-wrap"><input type="number" class="rate-inp" id="fd_0s" value="7.5" step="0.25" min="0" max="20"><span class="rate-pct">% p.a.</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">📅 Recurring Deposit (RD) Rates</div>
+        <div class="rate-grid">
+          <div class="rate-item"><div class="rate-scheme">RD — 36 ತಿಂಗಳು</div><div class="rate-tenure">36 Months</div><div class="rate-input-wrap"><input type="number" class="rate-inp" id="rd_36" value="10" step="0.25" min="0" max="20"><span class="rate-pct">% p.a.</span></div></div>
+          <div class="rate-item"><div class="rate-scheme">RD — 24 ತಿಂಗಳು</div><div class="rate-tenure">24 Months</div><div class="rate-input-wrap"><input type="number" class="rate-inp" id="rd_24" value="9" step="0.25" min="0" max="20"><span class="rate-pct">% p.a.</span></div></div>
+          <div class="rate-item"><div class="rate-scheme">RD — 12 ತಿಂಗಳು</div><div class="rate-tenure">12 Months</div><div class="rate-input-wrap"><input type="number" class="rate-inp" id="rd_12" value="8" step="0.25" min="0" max="20"><span class="rate-pct">% p.a.</span></div></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">🌱 Pigmy Rates</div>
+        <div class="rate-grid">
+          <div class="rate-item"><div class="rate-scheme">ಪಿಗ್ಮಿ — 0–3 ವರ್ಷ</div><div class="rate-tenure">0–3 Years</div><div class="rate-input-wrap"><input type="number" class="rate-inp" id="pigmy_3" value="3" step="0.25" min="0" max="20"><span class="rate-pct">% p.a.</span></div></div>
+          <div class="rate-item"><div class="rate-scheme">ಪಿಗ್ಮಿ — 3 ವರ್ಷ+</div><div class="rate-tenure">3+ Years</div><div class="rate-input-wrap"><input type="number" class="rate-inp" id="pigmy_3p" value="3" step="0.25" min="0" max="20"><span class="rate-pct">% p.a.</span></div></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:1rem">
+        <button class="btn-primary" onclick="saveRates()">💾 Save Rates</button>
+        <button class="btn-secondary" onclick="loadSavedRates()">↺ Reset to Saved</button>
+      </div>
+    </div>
+
+    <!-- NOTIFICATIONS -->
+    <div id="tab-notifications" class="tab-content">
+      <div class="page-header"><div class="page-title">🔔 Notification Manager</div><div class="page-sub">Push notifications visible on the website to all visitors</div></div>
+      <div class="grid2">
+        <div class="panel">
+          <div class="panel-title">➕ Create Notification</div>
+          <div class="fg"><label class="fl">Type</label>
+            <select class="fs" id="nType">
+              <option value="success">✓ Success (Green)</option>
+              <option value="alert">ⓘ Alert (Orange)</option>
+              <option value="info">✦ Info (Blue)</option>
+              <option value="danger">⚠ Danger (Red)</option>
+            </select>
+          </div>
+          <div class="fg"><label class="fl">Icon (Emoji)</label><input type="text" class="fi" id="nIcon" value="✓" maxlength="4"></div>
+          <div class="fg"><label class="fl">Title (ಕನ್ನಡ / English)</label><input type="text" class="fi" id="nTitle" placeholder="ಅಧಿಸೂಚನೆ ಶೀರ್ಷಿಕೆ / Notification Title"></div>
+          <div class="fg"><label class="fl">Message</label><textarea class="ft" id="nMsg" placeholder="ಸಂದೇಶ / Message..." rows="3"></textarea></div>
+          <div class="fg"><label class="fl">Time Label</label><input type="text" class="fi" id="nTime" value="ಈಗ / Just now"></div>
+          <div style="display:flex;gap:.75rem">
+            <button class="btn-primary" onclick="addNotif()">📤 Push Notification</button>
+            <button class="btn-secondary" onclick="previewNotif()">👁 Preview</button>
+          </div>
+          <div id="notifPreview" style="margin-top:1rem;display:none">
+            <div class="np-title">Preview:</div>
+            <div id="npItem" class="np-item success">
+              <div class="np-icon" id="npIcon">✓</div>
+              <div class="np-body"><div class="np-ttl" id="npTitle">Title</div><div class="np-msg" id="npMsg">Message</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-title">📋 Active Notifications</div>
+          <div id="notifList" style="display:flex;flex-direction:column;gap:.75rem"></div>
+          <button class="btn-danger" style="margin-top:1rem;width:100%" onclick="clearAllNotifs()">🗑 Clear All Custom Notifications</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MEMBERS -->
+    <div id="tab-members" class="tab-content">
+      <div class="page-header"><div class="page-title">👥 Member Summary</div><div class="page-sub">Member statistics from 2024-25 Annual Report</div></div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-num">1,644</div><div class="stat-label">ಒಟ್ಟು ಸದಸ್ಯರು 2024-25</div><div class="stat-trend up">↑ from 1,486 in 2023-24</div></div>
+        <div class="stat-card"><div class="stat-icon">💼</div><div class="stat-num">₹68.59L</div><div class="stat-label">ಶೇರು ಬಂಡವಾಳ</div><div class="stat-trend up">↑ from ₹58.99L</div></div>
+        <div class="stat-card"><div class="stat-icon">📊</div><div class="stat-num">8%</div><div class="stat-label">ಡಿವಿಡೆಂಟ್ ದರ 2024-25</div><div class="stat-trend up">₹4,17,008 distributed</div></div>
+        <div class="stat-card"><div class="stat-icon">🎓</div><div class="stat-num">₹20,000</div><div class="stat-label">ವಿದ್ಯಾರ್ಥಿ ಪ್ರೋತ್ಸಾಹ</div><div class="stat-trend up">SSLC & PUC 90%+</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">📋 Member Registration Info</div>
+        <p style="color:var(--text2);font-size:14px;font-family:'Noto Sans Kannada',sans-serif;line-height:1.8">
+          ✓ ಮಿನಿಮಮ್ ಶೇರು ಕೊಳ್ಳುವ ಮೂಲಕ ಸದಸ್ಯರಾಗಿ<br>
+          ✓ ಸಂಘದ ಸೇವೆಗಳನ್ನು ಬಳಸಿಕೊಳ್ಳುವ ಕುರಿತು ಮಾಹಿತಿ ಪಡೆಯಿರಿ<br>
+          ✓ ಕಳೆದ 5 ವಾರ್ಷಿಕ ಮಹಾಸಭೆಗಳ ಪೈಕಿ ಕನಿಷ್ಠ 2 ಮಹಾಸಭೆಗೆ ಹಾಜರಾಗಿ<br>
+          ✓ ವಿಳಾಸ ಬದಲಾದಲ್ಲಿ ಲಿಖಿತ ರೂಪದಲ್ಲಿ ಕಚೇರಿಗೆ ಸಲ್ಲಿಸಿ<br>
+          ✓ ಕಾರ್ಡ್ ಕಳೆದುಹೋದಲ್ಲಿ ₹50 ಪಾವತಿ ಅಗತ್ಯ
+        </p>
+      </div>
+      <div class="panel">
+        <div class="panel-title">🏆 Student Scholarship Info (ಪ್ರತಿಭಾ ಪುರಸ್ಕಾರ)</div>
+        <p style="color:var(--text2);font-size:14px;font-family:'Noto Sans Kannada',sans-serif;line-height:1.8">
+          ✓ SSLC ಮತ್ತು PUC ಪರೀಕ್ಷೆಗಳಲ್ಲಿ 90% ಕ್ಕಿಂತ ಹೆಚ್ಚು ಅಂಕ ಗಳಿಸಿದ ಸದಸ್ಯರ ಮಕ್ಕಳಿಗೆ ಪ್ರಶಸ್ತಿ<br>
+          ✓ ದಾಖಲೆಗಳನ್ನು 08-09-2025 ಸೋಮವಾರದ ಒಳಗಾಗಿ ಸಂಸ್ಥೆಯ ಕಚೇರಿಗೆ ಸಲ್ಲಿಸಬೇಕು<br>
+          ✓ ಸಾಮಾನ್ಯ ಸಭೆಯಲ್ಲಿ (14-09-2025) ಪ್ರಶಸ್ತಿ ವಿತರಣೆ
+        </p>
+      </div>
+    </div>
+
+    <!-- SCHEMES -->
+    <div id="tab-schemes" class="tab-content">
+      <div class="page-header"><div class="page-title">📋 Scheme Details Editor</div><div class="page-sub">Manage scheme descriptions and minimum amounts</div></div>
+      <div class="alert" id="schemeAlert"></div>
+      <div class="panel">
+        <div class="panel-title">🏦 Fixed Deposit Settings</div>
+        <div class="grid2">
+          <div class="fg"><label class="fl">Min Amount (FD)</label><input type="number" class="fi" id="fd_min" value="1000" placeholder="1000"></div>
+          <div class="fg"><label class="fl">Max Amount (FD)</label><input type="number" class="fi" id="fd_max" value="1000000" placeholder="1000000"></div>
+        </div>
+        <div class="fg"><label class="fl">FD Description (ಕನ್ನಡ)</label><textarea class="ft" id="fd_desc">ನಿಗದಿತ ಠೇವಣಿ — ನಿರಾಪದ ಮತ್ತು ಗ್ಯಾರಂಟೀ ರಿಟರ್ನ್ಸ್ ಜೊತೆಗೆ ಉತ್ತಮ ಬಡ್ಡಿ ದರ.</textarea></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">⭐ Special Schemes</div>
+        <div class="fg"><label class="fl">Double Scheme Years</label><input type="number" class="fi" id="double_years" value="7.5" step="0.5"></div>
+        <div class="fg"><label class="fl">Bhavishya Nidhi Row 1 (Monthly / Return)</label>
+          <div class="grid2"><input type="text" class="fi" id="bn_m1" value="500"><input type="text" class="fi" id="bn_r1" value="25000"></div>
+        </div>
+        <div class="fg"><label class="fl">Bhavishya Nidhi Row 2 (Monthly / Return)</label>
+          <div class="grid2"><input type="text" class="fi" id="bn_m2" value="1000"><input type="text" class="fi" id="bn_r2" value="50000"></div>
+        </div>
+        <div class="fg"><label class="fl">Bhavishya Nidhi Row 3 (Monthly / Return)</label>
+          <div class="grid2"><input type="text" class="fi" id="bn_m3" value="2000"><input type="text" class="fi" id="bn_r3" value="100000"></div>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="saveSchemes()">💾 Save Scheme Settings</button>
+    </div>
+
+    <!-- ANNOUNCEMENTS -->
+    <div id="tab-announcements" class="tab-content">
+      <div class="page-header"><div class="page-title">📢 Announcements</div><div class="page-sub">Important announcements from 2024-25 Annual Report</div></div>
+      <div class="panel">
+        <div class="panel-title">📅 Annual General Meeting — 2024-25</div>
+        <div style="background:var(--bg);border-radius:12px;padding:1.25rem;font-family:'Noto Sans Kannada',sans-serif;font-size:15px;line-height:2">
+          <strong>ದಿನಾಂಕ:</strong> 14-09-2025 (ಭಾನುವಾರ)<br>
+          <strong>ಸಮಯ:</strong> ಬೆಳಿಗ್ಗೆ 10:30<br>
+          <strong>ಸ್ಥಳ:</strong> ಸುವರ್ಣ ಸಹಕಾರ ಭವನ (ಟಿ.ಎ.ಪಿ.ಸಿ.ಎಂ.ಎಸ್.), ತೀರ್ಥಹಳ್ಳಿ<br>
+          <strong>ಅಧ್ಯಕ್ಷತೆ:</strong> ಶ್ರೀಮತಿ ಜೀನಾ ವಿಕ್ಟರ್ ಡಿಸೋಜ<br>
+          <strong>ಪ್ರಸ್ತಾಪಗಳು:</strong> 2024-25 ಆಡಳಿತ ವರದಿ, ಲೆಕ್ಕ ಪರಿಶೋಧನಾ ವರದಿ, ಲಾಭಾಂಶ ವಿಲೇವಾರಿ, 2025-26 ಬಜೆಟ್
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">➕ Add Custom Announcement</div>
+        <div class="fg"><label class="fl">Announcement Title</label><input type="text" class="fi" id="annTitle" placeholder="ಅಧಿಸೂಚನೆ ಶೀರ್ಷಿಕೆ"></div>
+        <div class="fg"><label class="fl">Announcement Content</label><textarea class="ft" id="annContent" rows="4" placeholder="ಸಂದೇಶ / Content..."></textarea></div>
+        <div class="fg"><label class="fl">Date</label><input type="date" class="fi" id="annDate"></div>
+        <button class="btn-primary" onclick="saveAnnouncement()">📤 Publish Announcement</button>
+      </div>
+      <div class="panel" id="annList-panel" style="display:none">
+        <div class="panel-title">📋 Published Announcements</div>
+        <div id="annList"></div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div id="tab-settings" class="tab-content">
+      <div class="page-header"><div class="page-title">⚙️ Settings</div><div class="page-sub">Website configuration and admin settings</div></div>
+      <div class="grid2">
+        <div class="panel">
+          <div class="panel-title">🔐 Change Admin Password</div>
+          <div class="fg"><label class="fl">Current Password</label><input type="password" class="fi" id="oldPass" placeholder="Current password"></div>
+          <div class="fg"><label class="fl">New Password</label><input type="password" class="fi" id="newPass" placeholder="New password"></div>
+          <div class="fg"><label class="fl">Confirm New Password</label><input type="password" class="fi" id="confPass" placeholder="Confirm password"></div>
+          <div class="alert" id="passAlert"></div>
+          <button class="btn-primary" onclick="changePass()">🔐 Update Password</button>
+        </div>
+        <div class="panel">
+          <div class="panel-title">🌐 Website Settings</div>
+          <div class="fg" style="margin-bottom:1.25rem">
+            <div class="toggle-wrap">
+              <label class="toggle"><input type="checkbox" id="togNotifs" checked onchange="saveSettings()"><span class="toggle-slider"></span></label>
+              <span class="toggle-label">Show Notifications on Website</span>
+            </div>
+          </div>
+          <div class="fg" style="margin-bottom:1.25rem">
+            <div class="toggle-wrap">
+              <label class="toggle"><input type="checkbox" id="togCalc" checked onchange="saveSettings()"><span class="toggle-slider"></span></label>
+              <span class="toggle-label">Show Interest Calculator</span>
+            </div>
+          </div>
+          <div class="fg" style="margin-bottom:1.25rem">
+            <div class="toggle-wrap">
+              <label class="toggle"><input type="checkbox" id="togTestimonials" checked onchange="saveSettings()"><span class="toggle-slider"></span></label>
+              <span class="toggle-label">Show Testimonials</span>
+            </div>
+          </div>
+          <div class="fg">
+            <label class="fl">Contact Phone</label>
+            <input type="text" class="fi" id="setPhone" value="+91 94824 15955" onchange="saveSettings()">
+          </div>
+          <div class="fg">
+            <label class="fl">Contact Email</label>
+            <input type="text" class="fi" id="setEmail" value="divyachetanamssn@gmail.com" onchange="saveSettings()">
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">ℹ️ Society Information</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;font-size:14px;color:var(--text2)">
+          <div><strong style="color:var(--text)">Registration No:</strong><br>ಡಿ.ಆರ್.ಎಸ್./ಆರ್.ಎಸ್.ಆರ್./ಸೌ.ಸ/ಪಿ.ಆರ್-46/ನೋಂದಣಿ-2674/2012-13</div>
+          <div><strong style="color:var(--text)">Incorporated:</strong><br>26-11-2012 (Registered) | 23-12-2012 (Inaugurated) | 09-01-2013 (Operations)</div>
+          <div><strong style="color:var(--text)">Auditor:</strong><br>ಆನಂದ್ ಎಸ್. ಯಡೇಹಳ್ಳಿ, CA, ಗಾಂಧಿನಗರ, ಶಿವಮೊಗ್ಗ</div>
+          <div><strong style="color:var(--text)">Printer:</strong><br>Sahyadri Creations, Thirthahalli — 8618893484</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /adminApp -->
+
+<script>
+// ===== AUTH =====
+const ADMIN_CREDS_KEY = 'dc_admin_creds';
+function getAdminCreds() {
+  const stored = localStorage.getItem(ADMIN_CREDS_KEY);
+  return stored ? JSON.parse(stored) : {user:'admin', pass:'divya2012'};
+}
+
+function doLogin() {
+  const u = document.getElementById('adminUser').value.trim();
+  const p = document.getElementById('adminPass').value;
+  const creds = getAdminCreds();
+  if (u === creds.user && p === creds.pass) {
+    sessionStorage.setItem('dc_admin','1');
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('adminApp').style.display='block';
+    renderNotifList();
+    loadSavedRates();
+    loadAnnouncements();
+    loadSettings();
+  } else {
+    document.getElementById('loginErr').classList.add('show');
+  }
+}
+// Allow Enter key
+document.addEventListener('keydown', e => { if (e.key==='Enter' && document.getElementById('loginScreen').style.display!=='none') doLogin(); });
+
+function logout() {
+  sessionStorage.removeItem('dc_admin');
+  window.location.reload();
+}
+
+// Auto-login if session active
+window.addEventListener('load', () => {
+  if (sessionStorage.getItem('dc_admin')==='1') {
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('adminApp').style.display='block';
+    renderNotifList(); loadSavedRates(); loadAnnouncements(); loadSettings();
+  }
+});
+
+// ===== TABS =====
+function showTab(id, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.sb-link').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+// ===== RATES =====
+function saveRates() {
+  const rates = {
+    fd_3g: document.getElementById('fd_3g').value,
+    fd_3s: document.getElementById('fd_3s').value,
+    fd_2g: document.getElementById('fd_2g').value,
+    fd_2s: document.getElementById('fd_2s').value,
+    fd_1g: document.getElementById('fd_1g').value,
+    fd_1s: document.getElementById('fd_1s').value,
+    fd_0g: document.getElementById('fd_0g').value,
+    fd_0s: document.getElementById('fd_0s').value,
+    rd_36: document.getElementById('rd_36').value,
+    rd_24: document.getElementById('rd_24').value,
+    rd_12: document.getElementById('rd_12').value,
+    pigmy_3: document.getElementById('pigmy_3').value,
+    pigmy_3p: document.getElementById('pigmy_3p').value,
+  };
+  localStorage.setItem('dc_rates', JSON.stringify(rates));
+  const a = document.getElementById('rateAlert');
+  a.className='alert ok show'; a.textContent='✓ Rates saved successfully! They will be reflected on the website.';
+  setTimeout(()=>a.classList.remove('show'),3000);
+}
+function loadSavedRates() {
+  const r = JSON.parse(localStorage.getItem('dc_rates') || '{}');
+  Object.keys(r).forEach(k => { const el=document.getElementById(k); if(el) el.value=r[k]; });
+}
+
+// ===== NOTIFICATIONS =====
+function addNotif() {
+  const type = document.getElementById('nType').value;
+  const icon = document.getElementById('nIcon').value;
+  const title = document.getElementById('nTitle').value.trim();
+  const msg = document.getElementById('nMsg').value.trim();
+  const time = document.getElementById('nTime').value.trim();
+  if (!title || !msg) { alert('Please fill in title and message'); return; }
+  const stored = JSON.parse(localStorage.getItem('dc_notifs') || '[]');
+  stored.unshift({type, icon, title, msg, time, id: Date.now()});
+  localStorage.setItem('dc_notifs', JSON.stringify(stored));
+  renderNotifList();
+  document.getElementById('nTitle').value='';
+  document.getElementById('nMsg').value='';
+  alert('✓ Notification pushed to website!');
+}
+function previewNotif() {
+  const type = document.getElementById('nType').value;
+  const icon = document.getElementById('nIcon').value;
+  const title = document.getElementById('nTitle').value || 'Title';
+  const msg = document.getElementById('nMsg').value || 'Message';
+  const prev = document.getElementById('notifPreview');
+  prev.style.display='block';
+  document.getElementById('npItem').className='np-item '+type;
+  document.getElementById('npIcon').textContent=icon;
+  document.getElementById('npTitle').textContent=title;
+  document.getElementById('npMsg').textContent=msg;
+}
+function renderNotifList() {
+  const list = document.getElementById('notifList');
+  if (!list) return;
+  const stored = JSON.parse(localStorage.getItem('dc_notifs') || '[]');
+  if (!stored.length) { list.innerHTML='<p style="color:var(--text2);font-size:14px">No custom notifications. Create one →</p>'; return; }
+  list.innerHTML = stored.map((n,i) => `
+    <div style="background:var(--bg);border-radius:10px;padding:.85rem;border:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem">
+      <div>
+        <span class="badge ${n.type==='success'?'success':n.type==='alert'?'warning':n.type==='danger'?'danger':'info'}">${n.type}</span>
+        <div style="font-weight:600;font-size:14px;margin:.3rem 0">${n.icon} ${n.title}</div>
+        <div style="font-size:13px;color:var(--text2)">${n.msg}</div>
+      </div>
+      <button class="btn-danger btn-sm" onclick="deleteNotif(${i})">✕</button>
+    </div>`).join('');
+}
+function deleteNotif(i) {
+  const s = JSON.parse(localStorage.getItem('dc_notifs') || '[]');
+  s.splice(i,1);
+  localStorage.setItem('dc_notifs', JSON.stringify(s));
+  renderNotifList();
+}
+function clearAllNotifs() {
+  if (confirm('Clear all custom notifications?')) { localStorage.removeItem('dc_notifs'); renderNotifList(); }
+}
+
+// ===== SCHEMES =====
+function saveSchemes() {
+  const data = {
+    fd_min: document.getElementById('fd_min').value,
+    fd_max: document.getElementById('fd_max').value,
+    fd_desc: document.getElementById('fd_desc').value,
+    double_years: document.getElementById('double_years').value,
+    bn: [[document.getElementById('bn_m1').value, document.getElementById('bn_r1').value],
+         [document.getElementById('bn_m2').value, document.getElementById('bn_r2').value],
+         [document.getElementById('bn_m3').value, document.getElementById('bn_r3').value]]
+  };
+  localStorage.setItem('dc_schemes', JSON.stringify(data));
+  const a = document.getElementById('schemeAlert');
+  a.className='alert ok show'; a.textContent='✓ Scheme settings saved!';
+  setTimeout(()=>a.classList.remove('show'),3000);
+}
+
+// ===== ANNOUNCEMENTS =====
+function saveAnnouncement() {
+  const title = document.getElementById('annTitle').value.trim();
+  const content = document.getElementById('annContent').value.trim();
+  const date = document.getElementById('annDate').value;
+  if (!title || !content) { alert('Please fill title and content'); return; }
+  const stored = JSON.parse(localStorage.getItem('dc_announcements') || '[]');
+  stored.unshift({title, content, date, id: Date.now()});
+  localStorage.setItem('dc_announcements', JSON.stringify(stored));
+  document.getElementById('annTitle').value='';
+  document.getElementById('annContent').value='';
+  loadAnnouncements();
+  alert('✓ Announcement published!');
+}
+function loadAnnouncements() {
+  const stored = JSON.parse(localStorage.getItem('dc_announcements') || '[]');
+  const panel = document.getElementById('annList-panel');
+  const list = document.getElementById('annList');
+  if (!stored.length) { if(panel) panel.style.display='none'; return; }
+  if(panel) panel.style.display='block';
+  list.innerHTML = stored.map((a,i) => `
+    <div style="background:var(--bg);border-radius:10px;padding:1rem;border:1px solid var(--border);margin-bottom:.75rem">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem">
+        <strong style="font-size:15px">${a.title}</strong>
+        <div style="display:flex;align-items:center;gap:.5rem">
+          <span style="font-size:12px;color:var(--text2)">${a.date}</span>
+          <button class="btn-danger btn-sm" onclick="deleteAnn(${i})">✕</button>
+        </div>
+      </div>
+      <p style="font-size:14px;color:var(--text2)">${a.content}</p>
+    </div>`).join('');
+}
+function deleteAnn(i) {
+  const s = JSON.parse(localStorage.getItem('dc_announcements') || '[]');
+  s.splice(i,1);
+  localStorage.setItem('dc_announcements', JSON.stringify(s));
+  loadAnnouncements();
+}
+
+// ===== SETTINGS =====
+function saveSettings() {
+  const s = {
+    showNotifs: document.getElementById('togNotifs').checked,
+    showCalc: document.getElementById('togCalc').checked,
+    showTest: document.getElementById('togTestimonials').checked,
+    phone: document.getElementById('setPhone').value,
+    email: document.getElementById('setEmail').value,
+  };
+  localStorage.setItem('dc_settings', JSON.stringify(s));
+}
+function loadSettings() {
+  const s = JSON.parse(localStorage.getItem('dc_settings') || '{}');
+  if (s.showNotifs !== undefined) document.getElementById('togNotifs').checked = s.showNotifs;
+  if (s.showCalc !== undefined) document.getElementById('togCalc').checked = s.showCalc;
+  if (s.showTest !== undefined) document.getElementById('togTestimonials').checked = s.showTest;
+  if (s.phone) document.getElementById('setPhone').value = s.phone;
+  if (s.email) document.getElementById('setEmail').value = s.email;
+}
+function changePass() {
+  const creds = getAdminCreds();
+  const old = document.getElementById('oldPass').value;
+  const nw = document.getElementById('newPass').value;
+  const conf = document.getElementById('confPass').value;
+  const a = document.getElementById('passAlert');
+  if (old !== creds.pass) { a.className='alert err show'; a.textContent='❌ Current password is incorrect'; return; }
+  if (nw.length < 6) { a.className='alert err show'; a.textContent='❌ New password must be at least 6 chars'; return; }
+  if (nw !== conf) { a.className='alert err show'; a.textContent='❌ Passwords do not match'; return; }
+  localStorage.setItem(ADMIN_CREDS_KEY, JSON.stringify({user: creds.user, pass: nw}));
+  a.className='alert ok show'; a.textContent='✓ Password updated successfully!';
+  document.getElementById('oldPass').value='';
+  document.getElementById('newPass').value='';
+  document.getElementById('confPass').value='';
+  setTimeout(()=>a.classList.remove('show'),3000);
+}
+</script>
+</body>
+</html>
