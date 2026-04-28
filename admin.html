@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin Panel — ದಿವ್ಯಚೇತನ ಸೌಹಾರ್ದ ಸಹಕಾರ ಸಂಘ</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Kannada:wght@400;600;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
 <style>
 :root{
   --primary:#C41E3A;--navy:#1A2A5A;--navy-dark:#0F1636;
@@ -150,6 +151,16 @@ tr:hover td{background:rgba(26,42,90,.02)}
 </head>
 <body>
 
+<!-- GOOGLE TRANSLATE HIDDEN WIDGET -->
+<div id="google_translate_element" style="display:none"></div>
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- LANG SWITCHER -->
+<div class="lang-sw">
+  <button class="lang-btn active" id="btnKn" onclick="setLang('kn',event)">🇮🇳 ಕನ್ನಡ</button>
+  <button class="lang-btn" id="btnEn" onclick="setLang('en',event)">🇬🇧 English</button>
+</div>
+
 <!-- LOGIN SCREEN -->
 <div id="loginScreen">
   <div class="login-card">
@@ -182,6 +193,7 @@ tr:hover td{background:rgba(26,42,90,.02)}
       <button class="sb-link" onclick="showTab('notifications',this)"><span class="icon">🔔</span> Notifications</button>
       <button class="sb-link" onclick="showTab('members',this)"><span class="icon">👥</span> Members</button>
       <div class="sb-section">Content</div>
+      <button class="sb-link" onclick="showTab('documents',this)"><span class="icon">📁</span> Documents</button>
       <button class="sb-link" onclick="showTab('schemes',this)"><span class="icon">📋</span> Scheme Details</button>
       <button class="sb-link" onclick="showTab('announcements',this)"><span class="icon">📢</span> Announcements</button>
       <button class="sb-link" onclick="showTab('settings',this)"><span class="icon">⚙️</span> Settings</button>
@@ -486,6 +498,28 @@ tr:hover td{background:rgba(26,42,90,.02)}
       </div>
     </div>
 
+    <!-- DOCUMENTS MANAGER -->
+    <div id="tab-documents" class="tab-content">
+      <div class="page-header"><div class="page-title">📁 Document Manager</div><div class="page-sub">Upload and manage documents visible on the Documents page</div></div>
+      <div class="alert" id="docAlert"></div>
+      <div class="panel">
+        <div class="panel-title">📤 Upload New Document</div>
+        <div class="grid2">
+          <div class="fg"><label class="fl">Year</label>
+            <select class="fs" id="docYear"></select>
+          </div>
+          <div class="fg"><label class="fl">Select File (PDF / Image)</label>
+            <input type="file" class="fi" id="docFile" accept=".pdf,.jpg,.jpeg,.png,.webp" multiple style="padding:8px">
+          </div>
+        </div>
+        <button class="btn-primary" onclick="uploadDoc()">📤 Upload Document</button>
+      </div>
+      <div class="panel">
+        <div class="panel-title">📋 Uploaded Documents</div>
+        <div id="adminDocList"></div>
+      </div>
+    </div>
+
   </div><!-- /main -->
 </div><!-- /adminApp -->
 
@@ -509,6 +543,8 @@ function doLogin() {
     loadSavedRates();
     loadAnnouncements();
     loadSettings();
+    initDocManager();
+    renderAdminDocs();
   } else {
     document.getElementById('loginErr').classList.add('show');
   }
@@ -526,7 +562,7 @@ window.addEventListener('load', () => {
   if (sessionStorage.getItem('dc_admin')==='1') {
     document.getElementById('loginScreen').style.display='none';
     document.getElementById('adminApp').style.display='block';
-    renderNotifList(); loadSavedRates(); loadAnnouncements(); loadSettings();
+    renderNotifList(); loadSavedRates(); loadAnnouncements(); loadSettings(); initDocManager(); renderAdminDocs();
   }
 });
 
@@ -709,6 +745,64 @@ function changePass() {
   document.getElementById('confPass').value='';
   setTimeout(()=>a.classList.remove('show'),3000);
 }
+
+// ===== DOCUMENTS =====
+function initDocManager(){
+  var sel=document.getElementById('docYear');
+  if(!sel||sel.children.length)return;
+  var y=new Date().getFullYear();
+  for(var i=y;i>=2012;i--){
+    var o=document.createElement('option');
+    o.value=i+'-'+(i+1).toString().slice(2);
+    o.textContent=i+'-'+(i+1).toString().slice(2);
+    sel.appendChild(o);
+  }
+}
+function uploadDoc(){
+  var files=document.getElementById('docFile').files;
+  var year=document.getElementById('docYear').value;
+  var a=document.getElementById('docAlert');
+  if(!files.length){a.className='alert err show';a.textContent='❌ Please select a file';setTimeout(function(){a.classList.remove('show')},3000);return;}
+  var docs=JSON.parse(localStorage.getItem('dc_documents')||'[]');
+  var count=0;
+  Array.from(files).forEach(function(file){
+    if(file.size>10*1024*1024){a.className='alert err show';a.textContent='❌ '+file.name+' too large (10MB max)';return;}
+    var reader=new FileReader();
+    reader.onload=function(e){
+      docs.push({id:Date.now()+'_'+Math.random().toString(36).substr(2,6),name:file.name,type:file.type,size:file.size,year:year,data:e.target.result,uploadedAt:new Date().toISOString()});
+      count++;
+      if(count>=files.length){
+        try{localStorage.setItem('dc_documents',JSON.stringify(docs));a.className='alert ok show';a.textContent='✓ '+count+' document(s) uploaded for '+year;renderAdminDocs();document.getElementById('docFile').value='';}catch(err){a.className='alert err show';a.textContent='❌ Storage full! Delete old documents first.';}
+        setTimeout(function(){a.classList.remove('show')},3000);
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+}
+function deleteDocument(id){
+  if(!confirm('Delete this document?'))return;
+  var docs=JSON.parse(localStorage.getItem('dc_documents')||'[]').filter(function(d){return d.id!==id});
+  localStorage.setItem('dc_documents',JSON.stringify(docs));
+  renderAdminDocs();
+}
+function renderAdminDocs(){
+  var list=document.getElementById('adminDocList');
+  if(!list)return;
+  var docs=JSON.parse(localStorage.getItem('dc_documents')||'[]');
+  if(!docs.length){list.innerHTML='<p style="color:var(--text2);font-size:14px">No documents uploaded yet.</p>';return;}
+  docs.sort(function(a,b){var ya=parseInt(a.year.split('-')[0]),yb=parseInt(b.year.split('-')[0]);return yb-ya||new Date(b.uploadedAt)-new Date(a.uploadedAt);});
+  list.innerHTML='<table><thead><tr><th>File</th><th>Year</th><th>Size</th><th>Date</th><th>Action</th></tr></thead><tbody>'+
+    docs.map(function(d){
+      var sz=d.size<1048576?(d.size/1024).toFixed(1)+' KB':(d.size/1048576).toFixed(1)+' MB';
+      var dt=new Date(d.uploadedAt).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+      var icon=d.type==='application/pdf'?'📄':'🖼';
+      return '<tr><td>'+icon+' '+d.name+'</td><td><span class="badge info">'+d.year+'</span></td><td>'+sz+'</td><td>'+dt+'</td><td><button class="btn-danger btn-sm" onclick="deleteDocument(\''+d.id+'\')" title="Delete">✕</button></td></tr>';
+    }).join('')+'</tbody></table>';
+}
 </script>
+
+<!-- GOOGLE TRANSLATE -->
+<script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+<script src="js/main.js"></script>
 </body>
 </html>

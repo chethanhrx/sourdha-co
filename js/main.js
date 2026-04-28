@@ -3,6 +3,15 @@ function googleTranslateElementInit(){
   new google.translate.TranslateElement({pageLanguage:'kn',includedLanguages:'kn,en',autoDisplay:false},'google_translate_element');
 }
 
+// ===== LOGO SWITCHER =====
+function switchLogos(lang) {
+  const logos = document.querySelectorAll('.lang-logo');
+  const logoSrc = lang === 'en' ? 'assets/images/logo-english.png' : 'assets/images/logo-kannada.jpg';
+  logos.forEach(function(logo) {
+    logo.src = logoSrc;
+  });
+}
+
 // ===== LANG SWITCHER =====
 let curLang = localStorage.getItem('dc_lang') || 'kn';
 
@@ -28,6 +37,7 @@ function triggerGoogleTranslate(targetLang) {
 function setLang(lang, e) {
   localStorage.setItem('dc_lang', lang);
   curLang = lang;
+  switchLogos(lang);
   if (lang === 'en') {
     triggerGoogleTranslate('en');
   } else {
@@ -39,6 +49,7 @@ function setLang(lang, e) {
 }
 
 window.addEventListener('load', function() {
+  switchLogos(curLang);
   if (curLang === 'en') {
     triggerGoogleTranslate('en');
   } else {
@@ -79,8 +90,7 @@ document.querySelectorAll('.scheme-card').forEach(c => {
 // ===== CALCULATOR =====
 const RATES = {
   fd: {1:8, 2:9, 3:10.5, 5:10.5},
-  rd: {1:8, 2:9, 3:10, 5:10},
-  pigmy: {1:3, 2:3, 3:3, 5:3}
+  rd: {1:8, 2:9, 3:10, 5:10}
 };
 let cScheme = 'fd';
 function switchScheme(s, btn) {

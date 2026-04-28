@@ -71,10 +71,20 @@
 </head>
 <body>
 
+<!-- GOOGLE TRANSLATE HIDDEN WIDGET -->
+<div id="google_translate_element" style="display:none"></div>
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- LANG SWITCHER -->
+<div class="lang-sw">
+  <button class="lang-btn active" id="btnKn" onclick="setLang('kn',event)">🇮🇳 ಕನ್ನಡ</button>
+  <button class="lang-btn" id="btnEn" onclick="setLang('en',event)">🇬🇧 English</button>
+</div>
+
 <!-- NAV -->
 <nav id="navbar" class="scrolled">
   <a href="index.html" class="nav-logo">
-    <img src="assets/images/logo-english.png" alt="ದಿವ್ಯಚೇತನ Logo">
+    <img src="assets/images/logo-english.png" alt="ದಿವ್ಯಚೇತನ Logo" class="lang-logo">
     <div class="nav-logo-txt">
       <div class="nav-logo-title">ದಿವ್ಯಚೇತನ ಸೌಹಾರ್ದ ಸಹಕಾರ ಸಂಘ</div>
       <div class="nav-logo-sub">ತೀರ್ಥಹಳ್ಳಿ 577432 | Est. 2012</div>
@@ -323,5 +333,9 @@
 function openMob() { document.getElementById('mobMenu').classList.add('open'); }
 function closeMob() { document.getElementById('mobMenu').classList.remove('open'); }
 </script>
+
+<!-- GOOGLE TRANSLATE -->
+<script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+<script src="js/main.js"></script>
 </body>
 </html>
