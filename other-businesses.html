@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="kn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ಇತರೆ ವ್ಯವಹಾರ | ದಿವ್ಯಚೇತನ ಸೌಹಾರ್ದ ಸಹಕಾರ ಸಂಘ ನಿಯಮಿತ</title>
+<meta name="description" content="ದಿವ್ಯಚೇತನ ಸೌಹಾರ್ದ ಸಹಕಾರ ಸಂಘ ನಿಯಮಿತ - ಇತರೆ ವ್ಯವಹಾರಗಳು. Xerox, Printing, Stationery, Insurance & more.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Kannada:wght@300;400;500;600;700;900&family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<style>
+/* PAGE-SPECIFIC STYLES */
+.page-hero{min-height:45vh;background:linear-gradient(135deg,#0F1636 0%,#1A2A5A 45%,#8B1428 100%);position:relative;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden}
+.page-hero-pattern{position:absolute;inset:0;background-image:radial-gradient(circle at 20% 80%,rgba(196,30,58,.35) 0%,transparent 50%),radial-gradient(circle at 80% 20%,rgba(212,168,82,.2) 0%,transparent 50%)}
+.page-hero-content{position:relative;z-index:2;padding:7rem 1.5rem 3rem}
+.page-hero h1{font-family:var(--ff-kn);font-size:clamp(1.8rem,4vw,3rem);font-weight:900;color:#fff;margin-bottom:.5rem}
+.page-hero p{font-family:var(--ff-disp);font-size:clamp(.9rem,1.8vw,1.2rem);color:var(--gold-light);font-style:italic}
+.breadcrumb{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:1.5rem;font-size:14px}
+.breadcrumb a{color:rgba(255,255,255,.6);text-decoration:none;transition:.2s}
+.breadcrumb a:hover{color:var(--gold)}
+.breadcrumb span{color:rgba(255,255,255,.4)}
+.breadcrumb .current{color:var(--gold-light)}
+
+/* BUSINESS CARDS */
+.biz-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:2rem;margin-top:2rem}
+.biz-card{background:#fff;border-radius:20px;overflow:hidden;box-shadow:var(--sh-md);transition:.4s;border:1px solid var(--border);position:relative}
+.biz-card:hover{transform:translateY(-8px);box-shadow:var(--sh-xl)}v
+.biz-card-header{padding:2rem 2rem 1.5rem;background:linear-gradient(135deg,rgba(26,42,90,.04),rgba(196,30,58,.03))}
+.biz-icon{width:60px;height:60px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:1rem}
+.biz-icon.xerox{background:rgba(14,165,233,.1);color:#0EA5E9}
+.biz-icon.print{background:rgba(196,30,58,.1);color:var(--primary)}
+.biz-icon.station{background:rgba(212,168,82,.12);color:var(--gold-dark)}
+.biz-icon.insure{background:rgba(16,185,129,.1);color:var(--green-dark)}
+.biz-icon.bill{background:rgba(139,92,246,.1);color:#8B5CF6}
+.biz-icon.mobile{background:rgba(245,158,11,.1);color:var(--amber)}
+.biz-card-title{font-family:var(--ff-kn);font-size:20px;font-weight:700;color:var(--navy);margin-bottom:4px}
+.biz-card-subtitle{font-size:13px;color:var(--text2);margin-bottom:0}
+.biz-card-body{padding:1.5rem 2rem 2rem}
+.biz-features{list-style:none;margin-bottom:1.5rem}
+.biz-features li{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--text2);padding:8px 0;border-bottom:1px solid rgba(0,0,0,.04);font-family:var(--ff-kn)}
+.biz-features li:last-child{border:none}
+.biz-check{width:20px;height:20px;background:var(--green-light);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;color:var(--green-dark);font-weight:700}
+.biz-price{display:inline-flex;align-items:center;gap:6px;background:var(--bg);padding:8px 16px;border-radius:50px;font-size:13px;font-weight:600;color:var(--navy);border:1px solid var(--border)}
+.biz-price strong{color:var(--primary);font-size:15px}
+.biz-cta{display:inline-flex;align-items:center;gap:6px;background:var(--grad-main);color:#fff;border:none;padding:10px 24px;border-radius:50px;font-size:14px;font-weight:600;cursor:pointer;text-decoration:none;transition:.3s;font-family:var(--ff-body);box-shadow:0 4px 15px rgba(196,30,58,.3);margin-left:8px}
+.biz-cta:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(196,30,58,.4)}
+
+/* INFO BANNER */
+.info-banner{background:linear-gradient(135deg,var(--navy),var(--navy-dark));border-radius:20px;padding:2.5rem;color:#fff;display:flex;align-items:center;gap:2rem;margin-top:3rem}
+.info-banner-icon{width:80px;height:80px;background:rgba(212,168,82,.15);border:1px solid rgba(212,168,82,.3);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:36px;flex-shrink:0}
+.info-banner h3{font-family:var(--ff-kn);font-size:20px;font-weight:700;margin-bottom:.5rem}
+.info-banner p{font-size:14px;opacity:.7;line-height:1.6;font-family:var(--ff-kn)}
+
+/* TIMING CARD */
+.timing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1.5rem;margin-top:2rem}
+.timing-card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:1.5rem;text-align:center;transition:.3s}
+.timing-card:hover{box-shadow:var(--sh-lg);transform:translateY(-4px)}
+.timing-card-icon{font-size:2.5rem;margin-bottom:.75rem}
+.timing-card h4{font-family:var(--ff-kn);font-size:16px;font-weight:700;color:var(--navy);margin-bottom:.5rem}
+.timing-card p{font-size:13px;color:var(--text2);font-family:var(--ff-kn)}
+.timing-card .time{font-family:var(--ff-disp);font-size:18px;font-weight:700;color:var(--primary);margin-top:.5rem}
+
+@media(max-width:768px){
+  .biz-grid{grid-template-columns:1fr}
+  .info-banner{flex-direction:column;text-align:center}
+  .timing-grid{grid-template-columns:1fr}
+  .page-hero{min-height:35vh}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="navbar" class="scrolled">
+  <a href="index.html" class="nav-logo">
+    <img src="assets/images/logo-english.png" alt="ದಿವ್ಯಚೇತನ Logo">
+    <div class="nav-logo-txt">
+      <div class="nav-logo-title">ದಿವ್ಯಚೇತನ ಸೌಹಾರ್ದ ಸಹಕಾರ ಸಂಘ</div>
+      <div class="nav-logo-sub">ತೀರ್ಥಹಳ್ಳಿ 577432 | Est. 2012</div>
+    </div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html#schemes">ಯೋಜನೆಗಳು</a></li>
+    <li><a href="other-businesses.html" style="color:var(--gold)">ಇತರೆ ವ್ಯವಹಾರ</a></li>
+    <li><a href="index.html#calculator">Calculator</a></li>
+    <li><a href="index.html#loans">ಸಾಲ</a></li>
+    <li><a href="index.html#about">About</a></li>
+    <li><a href="index.html#contact">Contact</a></li>
+  </ul>
+  <div style="display:flex;align-items:center;gap:10px">
+    <button class="hamburger" onclick="openMob()">☰</button>
+  </div>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mob-menu" id="mobMenu">
+  <button class="mob-close" onclick="closeMob()">✕</button>
+  <a href="index.html">🏠 ಮುಖಪುಟ</a>
+  <a href="index.html#schemes" onclick="closeMob()">ಯೋಜನೆಗಳು</a>
+  <a href="other-businesses.html" onclick="closeMob()">ಇತರೆ ವ್ಯವಹಾರ</a>
+  <a href="index.html#calculator" onclick="closeMob()">ಬಡ್ಡಿ ಲೆಕ್ಕಾಚಾರ</a>
+  <a href="index.html#loans" onclick="closeMob()">ಸಾಲ ಸೇವೆಗಳು</a>
+  <a href="index.html#contact" onclick="closeMob()">ಸಂಪರ್ಕ</a>
+</div>
+
+<!-- PAGE HERO -->
+<section class="page-hero">
+  <div class="page-hero-pattern"></div>
+  <div class="page-hero-content">
+    <div class="breadcrumb">
+      <a href="index.html">ಮುಖಪುಟ</a>
+      <span>›</span>
+      <span class="current">ಇತರೆ ವ್ಯವಹಾರ</span>
+    </div>
+    <h1>ಇತರೆ ವ್ಯವಹಾರಗಳು</h1>
+    <p>Other Business Services — ಸಹಕಾರಿಯಿಂದ ದೊರೆಯುವ ಹೆಚ್ಚುವರಿ ಸೇವೆಗಳು</p>
+  </div>
+</section>
+
+<!-- BUSINESS SERVICES -->
+<section class="sec" style="background:#fff">
+  <div class="sec-inner">
+    <h2 class="sec-title-kn">ನಮ್ಮ ಸೇವೆಗಳು</h2>
+    <div class="sec-line"></div>
+    <p class="sec-sub">ಸದಸ್ಯರ ಅನುಕೂಲಕ್ಕಾಗಿ ವಿವಿಧ ಸೇವೆಗಳನ್ನು ಒದಗಿಸುತ್ತಿದ್ದೇವೆ — Services for our members' convenience</p>
+
+    <div class="biz-grid">
+
+      <!-- XEROX / PHOTOCOPY -->
+      <div class="biz-card">
+        <div class="biz-card-header">
+          <div class="biz-icon xerox">📄</div>
+          <div class="biz-card-title">ಝೆರಾಕ್ಸ್ / ಫೋಟೋಕಾಪಿ</div>
+          <p class="biz-card-subtitle">Xerox & Photocopy Services</p>
+        </div>
+        <div class="biz-card-body">
+          <ul class="biz-features">
+            <li><span class="biz-check">✓</span>A4 ಕಪ್ಪು & ಬಿಳಿ ಝೆರಾಕ್ಸ್</li>
+            <li><span class="biz-check">✓</span>A3 ಮತ್ತು ಕಾನೂನು ಗಾತ್ರ ಪ್ರತಿಗಳು</li>
+            <li><span class="biz-check">✓</span>ಬಣ್ಣದ ಝೆರಾಕ್ಸ್ (Color Xerox)</li>
+            <li><span class="biz-check">✓</span>ಆಧಾರ್, PAN, ದಾಖಲೆ ಪ್ರತಿಗಳು</li>
+            <li><span class="biz-check">✓</span>ಭೂಮಿ ದಾಖಲೆ ಪ್ರತಿಗಳು</li>
+          </ul>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span class="biz-price">B&W: <strong>₹1/page</strong></span>
+            <span class="biz-price">Color: <strong>₹5/page</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRINTING -->
+      <div class="biz-card">
+        <div class="biz-card-header">
+          <div class="biz-icon print">🖨️</div>
+          <div class="biz-card-title">ಮುದ್ರಣ ಸೇವೆ</div>
+          <p class="biz-card-subtitle">Printing Services</p>
+        </div>
+        <div class="biz-card-body">
+          <ul class="biz-features">
+            <li><span class="biz-check">✓</span>ಲೆಟರ್ ಹೆಡ್ & ಬಿಲ್ ಬುಕ್ ಮುದ್ರಣ</li>
+            <li><span class="biz-check">✓</span>ವಿಸಿಟಿಂಗ್ ಕಾರ್ಡ್ ಮುದ್ರಣ</li>
+            <li><span class="biz-check">✓</span>ಮದುವೆ ಆಮಂತ್ರಣ ಪತ್ರಿಕೆ</li>
+            <li><span class="biz-check">✓</span>ಪೋಸ್ಟರ್ & ಬ್ಯಾನರ್ ಪ್ರಿಂಟಿಂಗ್</li>
+            <li><span class="biz-check">✓</span>ID ಕಾರ್ಡ್ & ಲ್ಯಾಮಿನೇಷನ್</li>
+          </ul>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span class="biz-price">ಆರಂಭ: <strong>₹50</strong></span>
+            <a href="index.html#contact" class="biz-cta">ಕೋಟ್ ಪಡೆಯಿರಿ →</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- STATIONERY -->
+      <div class="biz-card">
+        <div class="biz-card-header">
+          <div class="biz-icon station">✏️</div>
+          <div class="biz-card-title">ಸ್ಟೇಷನರಿ ಅಂಗಡಿ</div>
+          <p class="biz-card-subtitle">Stationery & Office Supplies</p>
+        </div>
+        <div class="biz-card-body">
+          <ul class="biz-features">
+            <li><span class="biz-check">✓</span>ನೋಟ್ ಬುಕ್, ಪೆನ್, ಪೆನ್ಸಿಲ್</li>
+            <li><span class="biz-check">✓</span>A4 ಪೇಪರ್ ರೀಮ್ & ಫೈಲ್ಸ್</li>
+            <li><span class="biz-check">✓</span>ಸ್ಟ್ಯಾಂಪ್ ಪೇಪರ್ & ಕವರ್</li>
+            <li><span class="biz-check">✓</span>ಕ್ಯಾಲ್ಕುಲೇಟರ್ & ಆಫೀಸ್ ಸಾಮಗ್ರಿ</li>
+            <li><span class="biz-check">✓</span>ಶಾಲಾ ಮಕ್ಕಳ ಸಾಮಗ್ರಿ (School Supplies)</li>
+          </ul>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span class="biz-price">ಸ್ಪರ್ಧಾತ್ಮಕ ಬೆಲೆ <strong>MRP</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- INSURANCE -->
+      <div class="biz-card">
+        <div class="biz-card-header">
+          <div class="biz-icon insure">🛡️</div>
+          <div class="biz-card-title">ವಿಮಾ ಸೇವೆಗಳು</div>
+          <p class="biz-card-subtitle">Insurance Services</p>
+        </div>
+        <div class="biz-card-body">
+          <ul class="biz-features">
+            <li><span class="biz-check">✓</span>ಜೀವ ವಿಮೆ (Life Insurance)</li>
+            <li><span class="biz-check">✓</span>ಆರೋಗ್ಯ ವಿಮೆ (Health Insurance)</li>
+            <li><span class="biz-check">✓</span>ವಾಹನ ವಿಮೆ (Vehicle Insurance)</li>
+            <li><span class="biz-check">✓</span>ಬೆಳೆ ವಿಮೆ (Crop Insurance)</li>
+            <li><span class="biz-check">✓</span>ಪ್ರೀಮಿಯಂ ಪಾವತಿ ಸಹಾಯ</li>
+          </ul>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span class="biz-price">ಶೇ. <strong>ಕಡಿಮೆ ಪ್ರೀಮಿಯಂ</strong></span>
+            <a href="index.html#contact" class="biz-cta">ವಿಚಾರಿಸಿ →</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- BILL PAYMENT -->
+      <div class="biz-card">
+        <div class="biz-card-header">
+          <div class="biz-icon bill">💡</div>
+          <div class="biz-card-title">ಬಿಲ್ ಪಾವತಿ ಸೇವೆ</div>
+          <p class="biz-card-subtitle">Bill Payment Services</p>
+        </div>
+        <div class="biz-card-body">
+          <ul class="biz-features">
+            <li><span class="biz-check">✓</span>ವಿದ್ಯುತ್ ಬಿಲ್ ಪಾವತಿ (BESCOM)</li>
+            <li><span class="biz-check">✓</span>ನೀರಿನ ಬಿಲ್ ಪಾವತಿ</li>
+            <li><span class="biz-check">✓</span>ಗ್ಯಾಸ್ ಬಿಲ್ ಪಾವತಿ</li>
+            <li><span class="biz-check">✓</span>DTH ರಿಚಾರ್ಜ್</li>
+            <li><span class="biz-check">✓</span>ತೆರಿಗೆ ಪಾವತಿ ಸಹಾಯ</li>
+          </ul>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span class="biz-price">ಸೇವಾ ಶುಲ್ಕ: <strong>₹5–₹20</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- MOBILE RECHARGE -->
+      <div class="biz-card">
+        <div class="biz-card-header">
+          <div class="biz-icon mobile">📱</div>
+          <div class="biz-card-title">ಮೊಬೈಲ್ ರಿಚಾರ್ಜ್</div>
+          <p class="biz-card-subtitle">Mobile Recharge & Data Plans</p>
+        </div>
+        <div class="biz-card-body">
+          <ul class="biz-features">
+            <li><span class="biz-check">✓</span>ಎಲ್ಲ ನೆಟ್‌ವರ್ಕ್ ರಿಚಾರ್ಜ್ (Jio, Airtel, Vi)</li>
+            <li><span class="biz-check">✓</span>ಡೇಟಾ ಪ್ಲ್ಯಾನ್ ರಿಚಾರ್ಜ್</li>
+            <li><span class="biz-check">✓</span>ಬ್ರಾಡ್‌ಬ್ಯಾಂಡ್ ಬಿಲ್ ಪಾವತಿ</li>
+            <li><span class="biz-check">✓</span>ಫಾಸ್ಟ್‌ಟ್ಯಾಗ್ ರಿಚಾರ್ಜ್</li>
+            <li><span class="biz-check">✓</span>ತಕ್ಷಣ ರಿಚಾರ್ಜ್ — Instant Processing</li>
+          </ul>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span class="biz-price">ಸೇವಾ ಶುಲ್ಕ: <strong>₹5 ರಿಂದ</strong></span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- INFO BANNER -->
+    <div class="info-banner">
+      <div class="info-banner-icon">🏢</div>
+      <div>
+        <h3>ಎಲ್ಲ ಸೇವೆಗಳು ಒಂದೇ ಸೂರಿನಡಿ!</h3>
+        <p>ದಿವ್ಯಚೇತನ ಸೌಹಾರ್ದ ಸಹಕಾರ ಸಂಘವು ಸದಸ್ಯರ ಮತ್ತು ಸಾರ್ವಜನಿಕರ ಅನುಕೂಲಕ್ಕಾಗಿ ಎಲ್ಲ ಸೇವೆಗಳನ್ನು ಒಂದೇ ಸ್ಥಳದಲ್ಲಿ ಒದಗಿಸುತ್ತದೆ. ಸದಸ್ಯರಿಗೆ ವಿಶೇಷ ರಿಯಾಯಿತಿ ಲಭ್ಯ. All services available under one roof at our Thirthahalli office. Special discounts for members.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TIMING & LOCATION -->
+<section class="sec" style="background:var(--bg)">
+  <div class="sec-inner">
+    <h2 class="sec-title-kn">ಸಮಯ & ಸ್ಥಳ</h2>
+    <div class="sec-line"></div>
+    <p class="sec-sub">Timings & Location — ನಮ್ಮನ್ನು ಭೇಟಿ ಮಾಡಿ</p>
+
+    <div class="timing-grid">
+      <div class="timing-card">
+        <div class="timing-card-icon">🕐</div>
+        <h4>ಕಚೇರಿ ಸಮಯ</h4>
+        <p>ಸೋಮವಾರ — ಶನಿವಾರ</p>
+        <div class="time">9:30 AM – 5:30 PM</div>
+      </div>
+      <div class="timing-card">
+        <div class="timing-card-icon">📍</div>
+        <h4>ಕಚೇರಿ ವಿಳಾಸ</h4>
+        <p>ಶೆಣ್ಣೈ ಕಾಂಪ್ಲೆಕ್ಸ್</p>
+        <div class="time">ತೀರ್ಥಹಳ್ಳಿ 577432</div>
+      </div>
+      <div class="timing-card">
+        <div class="timing-card-icon">📞</div>
+        <h4>ಸಂಪರ್ಕ</h4>
+        <p>ಕರೆ ಮಾಡಿ ಅಥವಾ ಭೇಟಿ ನೀಡಿ</p>
+        <div class="time"><a href="index.html#contact" style="color:var(--primary);text-decoration:none">ಸಂಪರ್ಕಿಸಿ →</a></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="sec" style="background:linear-gradient(135deg,#0F1636 0%,#1A2A5A 45%,#8B1428 100%);text-align:center;padding:4rem 1.5rem">
+  <div class="sec-inner">
+    <h2 style="font-family:var(--ff-kn);font-size:clamp(1.4rem,3vw,2.2rem);font-weight:700;color:#fff;margin-bottom:1rem">ಇಂದೇ ನಮ್ಮ ಕಚೇರಿಗೆ ಭೇಟಿ ನೀಡಿ!</h2>
+    <p style="color:var(--gold-light);font-size:16px;font-family:var(--ff-kn);margin-bottom:2rem;opacity:.8">Visit our office today for all your business needs</p>
+    <div style="display:flex;justify-content:center;gap:1rem;flex-wrap:wrap">
+      <a href="index.html" class="btn-p">← ಮುಖಪುಟಕ್ಕೆ ಹಿಂತಿರುಗಿ</a>
+      <a href="index.html#contact" class="btn-s">ಸಂಪರ್ಕಿಸಿ</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER (simplified) -->
+<footer>
+  <div class="footer-bottom">
+    <span>© 2025 ದಿವ್ಯಚೇತನ ಸೌಹಾರ್ದ ಸಹಕಾರ ಸಂಘ ನಿಯಮಿತ, ತೀರ್ಥಹಳ್ಳಿ 577432</span>
+    <div class="f-badge">✓ ನೋಂದಾಯಿತ ಸಹಕಾರ ಸಂಘ</div>
+  </div>
+</footer>
+
+<script>
+function openMob() { document.getElementById('mobMenu').classList.add('open'); }
+function closeMob() { document.getElementById('mobMenu').classList.remove('open'); }
+</script>
+</body>
+</html>
