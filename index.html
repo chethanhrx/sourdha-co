@@ -68,11 +68,12 @@ nav.scrolled{background:rgba(26,42,90,.97);backdrop-filter:blur(20px);box-shadow
 .hero-particles{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 .particle{position:absolute;border-radius:50%;background:rgba(212,168,82,.12);animation:float linear infinite}
 @keyframes float{0%{transform:translateY(110vh) scale(0);opacity:0}10%{opacity:1}90%{opacity:.2}100%{transform:translateY(-80px) scale(1);opacity:0}}
-.hero-content{position:relative;z-index:2;max-width:850px;padding:6rem 1.5rem 4rem}
-.hero-logo{width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid rgba(212,168,82,.6);box-shadow:0 0 40px rgba(212,168,82,.25),var(--sh-xl);margin:0 auto 1.5rem;display:block;animation:logoFloat 3.5s ease-in-out infinite}
-@keyframes logoFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
-.hero-kn{font-family:var(--ff-kn);font-size:clamp(1.8rem,5vw,3.5rem);font-weight:900;color:#fff;line-height:1.2;animation:slideL .7s .2s ease-out both}
-.hero-en{font-family:var(--ff-disp);font-size:clamp(.9rem,2vw,1.4rem);color:var(--gold-light);font-style:italic;margin-top:.4rem;margin-bottom:2rem;animation:fadeIn .6s .4s ease-out both}
+.hero-content{position:relative;z-index:2;max-width:1100px;padding:6rem 1.5rem 4rem}
+.hero-heading{display:flex;align-items:flex-start;justify-content:center;gap:1.25rem;margin-bottom:1.5rem}
+.hero-logo{width:70px;height:70px;border-radius:50%;object-fit:cover;border:3px solid rgba(212,168,82,.6);box-shadow:0 0 40px rgba(212,168,82,.25),var(--sh-xl);flex-shrink:0}
+.hero-heading-text{text-align:center}
+.hero-kn{font-family:var(--ff-kn);font-size:clamp(1.5rem,3.5vw,2.8rem);font-weight:900;color:#fff;line-height:1.2;white-space:nowrap;animation:slideL .7s .2s ease-out both}
+.hero-en{font-family:var(--ff-disp);font-size:clamp(.85rem,1.8vw,1.25rem);color:var(--gold-light);font-style:italic;margin-top:.4rem;animation:fadeIn .6s .4s ease-out both}
 @keyframes slideL{from{opacity:0;transform:translateX(-50px)}to{opacity:1;transform:translateX(0)}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 .hero-stats{display:flex;justify-content:center;gap:2.5rem;margin-bottom:2rem;animation:fadeIn .6s .6s both;flex-wrap:wrap}
@@ -309,7 +310,7 @@ a.ci-val:hover{color:var(--gold)}
 /* FOOTER */
 footer{background:var(--navy-dark);color:rgba(255,255,255,.65);padding:clamp(2.5rem,4vw,4rem) clamp(1rem,3vw,2rem) 1.5rem}
 .footer-grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1.5fr;gap:3rem;padding-bottom:2rem;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:1.5rem}
-.fb-name{font-family:var(--ff-kn);font-size:17px;font-weight:700;color:#fff;margin-bottom:5px}
+.fb-name{font-family:var(--ff-kn);font-size:14px;font-weight:700;color:#fff;margin-bottom:5px;white-space:nowrap}
 .fb-desc{font-size:13px;line-height:1.6;max-width:270px}
 .fc-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--gold);margin-bottom:.9rem}
 .fl-list{list-style:none}
@@ -344,6 +345,11 @@ footer{background:var(--navy-dark);color:rgba(255,255,255,.65);padding:clamp(2.5
   .footer-grid>*:first-child{grid-column:auto}
   .footer-bottom{flex-direction:column;text-align:center}
   .hero{min-height:72vh}
+  .hero-heading{gap:.75rem}
+  .hero-logo{width:50px;height:50px;border-width:2px}
+  .hero-kn{font-size:1.1rem;white-space:normal}
+  .hero-en{font-size:.75rem}
+  .hero-content{padding:5rem 1rem 3rem}
   .h-div{display:none}
   .lang-sw{top:auto;bottom:90px;right:12px}
   /* notif handled by carousel now */
@@ -421,9 +427,13 @@ iframe.goog-te-menu-frame { display: none !important; }
   <div class="hero-particles" id="particles"></div>
   <div class="hero-pattern"></div>
   <div class="hero-content">
-    <img src="logo-english.png" alt="Logo" class="hero-logo">
-    <h1 class="hero-kn">ದಿವ್ಯಚೇತನ ಸೌಹಾರ್ದ ಸಹಕಾರ ಸಂಘ ನಿಯಮಿತ</h1>
-    <p class="hero-en">"ತೀರ್ಥಹಳ್ಳಿ 577432 — ನೋಂದಣಿ ಸಂಖ್ಯೆ: ಡಿ.ಆರ್.ಎಸ್./ಆರ್.ಎಸ್.ಆರ್./ಸೌ.ಸ/ಪಿ.ಆರ್-46/ನೋಂದಣಿ-2674/2012-13"</p>
+    <div class="hero-heading">
+      <img src="logo-english.png" alt="Logo" class="hero-logo">
+      <div class="hero-heading-text">
+        <h1 class="hero-kn">ದಿವ್ಯಚೇತನ ಸೌಹಾರ್ದ ಸಹಕಾರ ಸಂಘ ನಿಯಮಿತ</h1>
+        <p class="hero-en">ತೀರ್ಥಹಳ್ಳಿ 577432</p>
+      </div>
+    </div>
     <div class="hero-stats">
       <div class="hero-stat">
         <div class="hero-stat-num" id="memCounter">1,644+</div>
@@ -907,7 +917,7 @@ iframe.goog-te-menu-frame { display: none !important; }
 <footer>
   <div class="footer-grid">
     <div>
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:.75rem">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:.75rem;flex-wrap:nowrap">
         <img src="logo-english.png" alt="Logo" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:1px solid rgba(212,168,82,.4)">
         <div class="fb-name">ದಿವ್ಯಚೇತನ ಸೌಹಾರ್ದ ಸಹಕಾರ ಸಂಘ ನಿಯಮಿತ</div>
       </div>
