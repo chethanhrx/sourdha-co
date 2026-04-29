@@ -32,7 +32,7 @@ body{font-family:var(--ff-body);background:var(--bg);color:var(--text);line-heig
 nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 clamp(1rem,3vw,2rem);display:flex;align-items:center;justify-content:space-between;transition:.3s}
 nav.scrolled{background:rgba(26,42,90,.97);backdrop-filter:blur(20px);box-shadow:var(--sh-lg)}
 .nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
-.nav-logo img{width:46px;height:46px;border-radius:50%;object-fit:cover;border:2px solid rgba(212,168,82,.5);box-shadow:var(--sh-md)}
+.nav-logo img{width:auto;height:48px;border-radius:10px;object-fit:contain;border:none}
 .nav-logo-txt{color:#fff}
 .nav-logo-title{font-family:var(--ff-kn);font-size:14px;font-weight:700;line-height:1.2}
 .nav-logo-sub{font-size:10px;opacity:.7}
@@ -59,7 +59,7 @@ nav.scrolled{background:rgba(26,42,90,.97);backdrop-filter:blur(20px);box-shadow
 @keyframes float{0%{transform:translateY(110vh) scale(0);opacity:0}10%{opacity:1}90%{opacity:.2}100%{transform:translateY(-80px) scale(1);opacity:0}}
 .hero-content{position:relative;z-index:2;max-width:1100px;padding:6rem 1.5rem 4rem}
 .hero-heading{display:flex;align-items:flex-start;justify-content:center;gap:1.25rem;margin-bottom:1.5rem}
-.hero-logo{width:70px;height:70px;border-radius:50%;object-fit:cover;border:3px solid rgba(212,168,82,.6);box-shadow:0 0 40px rgba(212,168,82,.25),var(--sh-xl);flex-shrink:0}
+.hero-logo{width:auto;height:90px;border-radius:14px;object-fit:contain;flex-shrink:0;filter:drop-shadow(0 4px 20px rgba(0,0,0,.35))}
 .hero-heading-text{text-align:center}
 .hero-kn{font-family:var(--ff-kn);font-size:clamp(1.5rem,3.5vw,2.8rem);font-weight:900;color:#fff;line-height:1.2;white-space:nowrap;animation:slideL .7s .2s ease-out both}
 .hero-en{font-family:var(--ff-disp);font-size:clamp(.85rem,1.8vw,1.25rem);color:var(--gold-light);font-style:italic;margin-top:.4rem;animation:fadeIn .6s .4s ease-out both}
@@ -298,7 +298,7 @@ a.ci-val:hover{color:var(--gold)}
 
 /* FOOTER */
 footer{background:var(--navy-dark);color:rgba(255,255,255,.65);padding:clamp(2.5rem,4vw,4rem) clamp(1rem,3vw,2rem) 1.5rem}
-.footer-grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1.5fr;gap:3rem;padding-bottom:2rem;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:1.5rem}
+.footer-grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1.5fr 1.5fr;gap:2rem;padding-bottom:2rem;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:1.5rem}
 .fb-name{font-family:var(--ff-kn);font-size:14px;font-weight:700;color:#fff;margin-bottom:5px;white-space:nowrap}
 .fb-desc{font-size:13px;line-height:1.6;max-width:270px}
 .fc-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--gold);margin-bottom:.9rem}
@@ -324,6 +324,7 @@ footer{background:var(--navy-dark);color:rgba(255,255,255,.65);padding:clamp(2.5
   .special-grid{grid-template-columns:1fr 1fr}
   .footer-grid{grid-template-columns:1fr 1fr}
   .footer-grid>*:first-child{grid-column:1/-1}
+  .footer-grid>*:nth-child(4){grid-column:1/-1}
 }
 @media(max-width:768px){
   .nav-links{display:none}
@@ -335,7 +336,7 @@ footer{background:var(--navy-dark);color:rgba(255,255,255,.65);padding:clamp(2.5
   .footer-bottom{flex-direction:column;text-align:center}
   .hero{min-height:72vh}
   .hero-heading{gap:.75rem}
-  .hero-logo{width:50px;height:50px;border-width:2px}
+  .hero-logo{height:65px}
   .hero-kn{font-size:1.1rem;white-space:normal}
   .hero-en{font-size:.75rem}
   .hero-content{padding:5rem 1rem 3rem}

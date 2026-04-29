@@ -6,9 +6,8 @@ function googleTranslateElementInit(){
 // ===== LOGO SWITCHER =====
 function switchLogos(lang) {
   const logos = document.querySelectorAll('.lang-logo');
-  const logoSrc = lang === 'en' ? 'assets/images/logo-english.png' : 'assets/images/logo-kannada.jpg';
   logos.forEach(function(logo) {
-    logo.src = logoSrc;
+    logo.src = 'assets/images/logo-english.png';
   });
 }
 
