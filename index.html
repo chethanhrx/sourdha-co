@@ -25,12 +25,14 @@
 <!-- MOBILE MENU -->
 <div class="mob-menu" id="mobMenu">
   <button class="mob-close" onclick="closeMob()">✕</button>
+  <a href="index.html" onclick="closeMob()">🏠 ಮುಖಪುಟ</a>
   <a href="#schemes" onclick="closeMob()">ಯೋಜನೆಗಳು</a>
-  <a href="#special" onclick="closeMob()">ವಿಶೇಷ ಯೋಜನೆಗಳು</a>
+  <a href="other-businesses.html" onclick="closeMob()">ಇತರೆ ವ್ಯವಹಾರ</a>
   <a href="#calculator" onclick="closeMob()">ಬಡ್ಡಿ ಲೆಕ್ಕಾಚಾರ</a>
   <a href="#loans" onclick="closeMob()">ಸಾಲ ಸೇವೆಗಳು</a>
-  <a href="#about" onclick="closeMob()">ನಮ್ಮ ಬಗ್ಗೆ</a>
+  <a href="documents.html" onclick="closeMob()">ದಾಖಲೆಗಳು</a>
   <a href="gallery.html" onclick="closeMob()">ಫೋಟೋ ಗ್ಯಾಲರಿ</a>
+  <a href="#about" onclick="closeMob()">ನಮ್ಮ ಬಗ್ಗೆ</a>
   <a href="#contact" onclick="closeMob()">ಸಂಪರ್ಕ</a>
 </div>
 
@@ -48,9 +50,9 @@
     <li><a href="other-businesses.html">ಇತರೆ ವ್ಯವಹಾರ</a></li>
     <li><a href="#calculator">Calculator</a></li>
     <li><a href="#loans">ಸಾಲ</a></li>
-    <li><a href="index.html#about">About</a></li>
     <li><a href="documents.html">ದಾಖಲೆಗಳು</a></li>
     <li><a href="gallery.html">Gallery</a></li>
+    <li><a href="#about">About</a></li>
     <li><a href="#contact">Contact</a></li>
   </ul>
   <div style="display:flex;align-items:center;gap:10px">
@@ -398,6 +400,46 @@
     </div>
   </div>
 </section>
+
+<!-- PHOTO GALLERY PREVIEW -->
+<section class="sec" id="home-gallery" style="background:var(--bg)">
+  <div class="sec-inner">
+    <h2 class="sec-title-kn">ಫೋಟೋ ಗ್ಯಾಲರಿ</h2>
+    <div class="sec-line"></div>
+    <p class="sec-sub">Photo Gallery — ಸಂಘದ ಇತ್ತೀಚಿನ ಚಿತ್ರಗಳು</p>
+    
+    <div id="homeGalleryPreview" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1rem;margin-bottom:2rem">
+      <!-- Latest images will appear here -->
+    </div>
+
+    <div style="text-align:center">
+      <a href="gallery.html" class="btn-p" style="padding:14px 40px">ಎಲ್ಲ ಫೋಟೋಗಳನ್ನು ನೋಡಿ &rarr; View All Photos</a>
+    </div>
+  </div>
+</section>
+
+<script>
+function renderHomeGallery() {
+  const container = document.getElementById('homeGalleryPreview');
+  const stored = localStorage.getItem('dc_gallery');
+  if (!container) return;
+  if (!stored || JSON.parse(stored).length === 0) {
+    container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--text2)">ಫೋಟೋಗಳನ್ನು ಶೀಘ್ರದಲ್ಲೇ ಅಪ್‌ಲೋಡ್ ಮಾಡಲಾಗುವುದು. Photos coming soon.</div>';
+    return;
+  }
+  const albums = JSON.parse(stored);
+  let images = [];
+  albums.forEach(a => { images = images.concat(a.images.slice(0, 2)); });
+  const displayImages = images.slice(0, 4);
+  
+  container.innerHTML = displayImages.map(img => `
+    <div style="aspect-ratio:4/3;overflow:hidden;border-radius:15px;box-shadow:var(--sh-md)">
+      <img src="${img}" style="width:100%;height:100%;object-fit:cover">
+    </div>
+  `).join('');
+}
+window.addEventListener('load', renderHomeGallery);
+</script>
 
 <!-- FINANCIAL HIGHLIGHTS -->
 <section class="sec" style="background:#fff" id="financials">

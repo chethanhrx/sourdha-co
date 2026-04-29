@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="kn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ಫೋಟೋ ಗ್ಯಾಲರಿ | ದಿವ್ಯಚೇತನ ಸೌಹಾರ್ದ ಸಹಕಾರ ಸಂಘ ನಿಯಮಿತ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Kannada:wght@300;400;500;600;700;900&family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<style>
+/* PAGE HERO */
+.page-hero{min-height:40vh;background:linear-gradient(135deg,#0F1636 0%,#1A2A5A 45%,#8B1428 100%);position:relative;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden}
+.page-hero-pattern{position:absolute;inset:0;background-image:radial-gradient(circle at 20% 80%,rgba(196,30,58,.35) 0%,transparent 50%),radial-gradient(circle at 80% 20%,rgba(212,168,82,.2) 0%,transparent 50%)}
+.page-hero-content{position:relative;z-index:2;padding:7rem 1.5rem 3rem}
+.page-hero h1{font-family:var(--ff-kn);font-size:clamp(1.8rem,4vw,3rem);font-weight:900;color:#fff;margin-bottom:.5rem}
+.page-hero p{font-family:var(--ff-disp);font-size:clamp(.9rem,1.8vw,1.2rem);color:var(--gold-light);font-style:italic}
+
+/* GALLERY GRID */
+.album-card{background:#fff;border-radius:24px;overflow:hidden;margin-bottom:3rem;box-shadow:var(--sh-lg);border:1px solid var(--border)}
+.album-header{padding:1.5rem 2rem;background:linear-gradient(135deg,rgba(26,42,90,.03),rgba(196,30,58,.02));border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.album-title{font-family:var(--ff-kn);font-size:22px;font-weight:700;color:var(--navy)}
+.album-meta{font-size:13px;color:var(--text2);font-weight:600}
+.image-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:1rem;padding:1.5rem}
+.gal-img-wrap{aspect-ratio:4/3;overflow:hidden;border-radius:12px;cursor:pointer;position:relative}
+.gal-img-wrap img{width:100%;height:100%;object-fit:cover;transition:.5s}
+.gal-img-wrap:hover img{transform:scale(1.1)}
+.gal-img-overlay{position:absolute;inset:0;background:rgba(26,42,90,0);transition:.3s;display:flex;align-items:center;justify-content:center;color:#fff;font-size:24px;opacity:0}
+.gal-img-wrap:hover .gal-img-overlay{background:rgba(26,42,90,.4);opacity:1}
+
+/* LIGHTBOX */
+#lightbox{position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:10000;display:none;align-items:center;justify-content:center;padding:2rem}
+#lightbox.active{display:flex}
+.lb-content{max-width:90%;max-height:90%;position:relative}
+.lb-img{max-width:100%;max-height:85vh;border-radius:8px;box-shadow:0 0 50px rgba(0,0,0,.5)}
+.lb-close{position:absolute;top:-40px;right:0;color:#fff;font-size:32px;cursor:pointer;background:none;border:none}
+.lb-nav{position:absolute;top:50%;width:110%;left:-5%;display:flex;justify-content:space-between;transform:translateY(-50%)}
+.lb-btn{background:rgba(255,255,255,.1);border:none;color:#fff;width:50px;height:50px;border-radius:50%;cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center;transition:.2s}
+.lb-btn:hover{background:rgba(255,255,255,.2);transform:scale(1.1)}
+
+@media(max-width:768px){.image-grid{grid-template-columns:repeat(2,1fr)}.page-hero{min-height:35vh}}
+@media(max-width:480px){.image-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- GOOGLE TRANSLATE HIDDEN WIDGET -->
+<div id="google_translate_element" style="display:none"></div>
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- LANG SWITCHER -->
+<div class="lang-sw">
+  <button class="lang-btn active" id="btnKn" onclick="setLang('kn',event)">🇮🇳 ಕನ್ನಡ</button>
+  <button class="lang-btn" id="btnEn" onclick="setLang('en',event)">🇬🇧 English</button>
+</div>
+
+<!-- NAV -->
+<nav id="navbar" class="scrolled">
+  <a href="index.html" class="nav-logo">
+    <img src="assets/images/logo-english.png" alt="ದಿವ್ಯಚೇತನ Logo" class="lang-logo">
+    <div class="nav-logo-txt">
+      <div class="nav-logo-title">ದಿವ್ಯಚೇತನ ಸೌಹಾರ್ದ ಸಹಕಾರ ಸಂಘ</div>
+      <div class="nav-logo-sub">ತೀರ್ಥಹಳ್ಳಿ 577432 | Est. 2012</div>
+    </div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html#schemes">ಯೋಜನೆಗಳು</a></li>
+    <li><a href="other-businesses.html">ಇತರೆ ವ್ಯವಹಾರ</a></li>
+    <li><a href="index.html#calculator">Calculator</a></li>
+    <li><a href="index.html#loans">ಸಾಲ</a></li>
+    <li><a href="index.html#about">About</a></li>
+    <li><a href="documents.html">ದಾಖಲೆಗಳು</a></li>
+    <li><a href="gallery.html" style="color:var(--gold)">Gallery</a></li>
+    <li><a href="index.html#contact">Contact</a></li>
+  </ul>
+  <div style="display:flex;align-items:center;gap:10px">
+    <a href="admin.html" style="background:var(--grad-main);color:#fff;padding:6px 14px;border-radius:50px;font-size:12px;font-weight:600;text-decoration:none;display:none" id="adminLink">Admin</a>
+    <button class="hamburger" onclick="openMob()">☰</button>
+  </div>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mob-menu" id="mobMenu">
+  <button class="mob-close" onclick="closeMob()">✕</button>
+  <a href="index.html">🏠 ಮುಖಪುಟ</a>
+  <a href="index.html#schemes" onclick="closeMob()">ಯೋಜನೆಗಳು</a>
+  <a href="other-businesses.html" onclick="closeMob()">ಇತರೆ ವ್ಯವಹಾರ</a>
+  <a href="index.html#calculator" onclick="closeMob()">ಬಡ್ಡಿ ಲೆಕ್ಕಾಚಾರ</a>
+  <a href="index.html#loans" onclick="closeMob()">ಸಾಲ ಸೇವೆಗಳು</a>
+  <a href="documents.html" onclick="closeMob()">ದಾಖಲೆಗಳು</a>
+  <a href="gallery.html" onclick="closeMob()">ಫೋಟೋ ಗ್ಯಾಲರಿ</a>
+  <a href="index.html#contact" onclick="closeMob()">ಸಂಪರ್ಕ</a>
+</div>
+
+<!-- PAGE HERO -->
+<section class="page-hero">
+  <div class="page-hero-pattern"></div>
+  <div class="page-hero-content">
+    <h1>ಫೋಟೋ ಗ್ಯಾಲರಿ</h1>
+    <p>Photo Gallery — ಸಂಘದ ವಿವಿಧ ಕಾರ್ಯಕ್ರಮಗಳ ನೆನಪುಗಳು</p>
+  </div>
+</section>
+
+<!-- GALLERY CONTENT -->
+<section class="sec">
+  <div class="sec-inner" id="galleryContainer">
+    <!-- Albums will be rendered here -->
+  </div>
+</section>
+
+<!-- LIGHTBOX -->
+<div id="lightbox">
+  <button class="lb-close" onclick="closeLB()">✕</button>
+  <div class="lb-content">
+    <img src="" class="lb-img" id="lbImg">
+    <div class="lb-nav">
+      <button class="lb-btn" onclick="prevImg()">❮</button>
+      <button class="lb-btn" onclick="nextImg()">❯</button>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-bottom">
+    <span>© 2025 ದಿವ್ಯಚೇತನ ಸೌಹಾರ್ದ ಸಹಕಾರ ಸಂಘ ನಿಯಮಿತ, ತೀರ್ಥಹಳ್ಳಿ 577432</span>
+    <div class="f-badge">✓ ನೋಂದಾಯಿತ ಸಹಕಾರ ಸಂಘ</div>
+  </div>
+</footer>
+
+<script>
+let allAlbums = [];
+let curAlbumIdx = 0;
+let curImgIdx = 0;
+
+function openMob() { document.getElementById('mobMenu').classList.add('open'); }
+function closeMob() { document.getElementById('mobMenu').classList.remove('open'); }
+
+function renderGallery() {
+  const container = document.getElementById('galleryContainer');
+  const stored = localStorage.getItem('dc_gallery');
+  if (!stored || JSON.parse(stored).length === 0) {
+    container.innerHTML = '<div style="text-align:center;padding:4rem 0;color:var(--text2)">' +
+      '<div style="font-size:4rem;margin-bottom:1rem">🖼️</div>' +
+      '<p style="font-family:var(--ff-kn);font-size:18px">ಇನ್ನೂ ಯಾವುದೇ ಫೋಟೋಗಳನ್ನು ಸೇರಿಸಲಾಗಿಲ್ಲ.</p>' +
+      '<p>No photos added to the gallery yet.</p></div>';
+    return;
+  }
+
+  allAlbums = JSON.parse(stored);
+  let html = '';
+  allAlbums.forEach((album, aIdx) => {
+    html += `
+      <div class="album-card">
+        <div class="album-header">
+          <div class="album-title">${album.title}</div>
+          <div class="album-meta">${album.images.length} ಫೋಟೋಗಳು</div>
+        </div>
+        <div class="image-grid">
+          ${album.images.map((img, iIdx) => `
+            <div class="gal-img-wrap" onclick="openLB(${aIdx}, ${iIdx})">
+              <img src="${img}" loading="lazy">
+              <div class="gal-img-overlay">🔍</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  });
+  container.innerHTML = html;
+}
+
+function openLB(aIdx, iIdx) {
+  curAlbumIdx = aIdx;
+  curImgIdx = iIdx;
+  document.getElementById('lbImg').src = allAlbums[curAlbumIdx].images[curImgIdx];
+  document.getElementById('lightbox').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLB() {
+  document.getElementById('lightbox').classList.remove('active');
+  document.body.style.overflow = 'auto';
+}
+
+function nextImg() {
+  curImgIdx = (curImgIdx + 1) % allAlbums[curAlbumIdx].images.length;
+  document.getElementById('lbImg').src = allAlbums[curAlbumIdx].images[curImgIdx];
+}
+
+function prevImg() {
+  curImgIdx = (curImgIdx - 1 + allAlbums[curAlbumIdx].images.length) % allAlbums[curAlbumIdx].images.length;
+  document.getElementById('lbImg').src = allAlbums[curAlbumIdx].images[curImgIdx];
+}
+
+// Close on background click
+document.getElementById('lightbox').onclick = function(e) {
+  if (e.target === this) closeLB();
+};
+
+// Keyboard nav
+document.addEventListener('keydown', e => {
+  if (!document.getElementById('lightbox').classList.contains('active')) return;
+  if (e.key === 'Escape') closeLB();
+  if (e.key === 'ArrowRight') nextImg();
+  if (e.key === 'ArrowLeft') prevImg();
+});
+
+renderGallery();
+</script>
+
+<!-- GOOGLE TRANSLATE -->
+<script src="js/main.js"></script>
+<script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+</body>
+</html>

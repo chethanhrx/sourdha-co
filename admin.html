@@ -196,6 +196,7 @@ tr:hover td{background:rgba(26,42,90,.02)}
       <button class="sb-link" onclick="showTab('documents',this)"><span class="icon">📁</span> Documents</button>
       <button class="sb-link" onclick="showTab('schemes',this)"><span class="icon">📋</span> Scheme Details</button>
       <button class="sb-link" onclick="showTab('announcements',this)"><span class="icon">📢</span> Announcements</button>
+      <button class="sb-link" onclick="showTab('gallery',this)"><span class="icon">🖼️</span> Gallery Manager</button>
       <button class="sb-link" onclick="showTab('settings',this)"><span class="icon">⚙️</span> Settings</button>
       <div class="sb-section">Quick Access</div>
       <a href="index.html" target="_blank" class="sb-link"><span class="icon">🌐</span> View Website</a>
@@ -442,6 +443,26 @@ tr:hover td{background:rgba(26,42,90,.02)}
       <div class="panel" id="annList-panel" style="display:none">
         <div class="panel-title">📋 Published Announcements</div>
         <div id="annList"></div>
+      </div>
+    </div>
+
+    <!-- GALLERY MANAGER -->
+    <div id="tab-gallery" class="tab-content">
+      <div class="page-header"><div class="page-title">🖼️ Gallery Manager</div><div class="page-sub">Upload and manage photo albums visible on the Gallery page</div></div>
+      <div class="alert" id="galleryAlert"></div>
+      <div class="panel">
+        <div class="panel-title">📤 Upload New Album / Group</div>
+        <div class="fg"><label class="fl">Album Title (e.g., Annual Meeting 2024)</label>
+          <input type="text" class="fi" id="galTitle" placeholder="ಶೀರ್ಷಿಕೆ / Album Title">
+        </div>
+        <div class="fg"><label class="fl">Select Images (Multiple)</label>
+          <input type="file" class="fi" id="galFiles" accept="image/*" multiple style="padding:8px">
+        </div>
+        <button class="btn-primary" onclick="uploadGallery()">📤 Create Album</button>
+      </div>
+      <div class="panel">
+        <div class="panel-title">📋 Managed Albums</div>
+        <div id="adminGalList"></div>
       </div>
     </div>
 
@@ -799,6 +820,89 @@ function renderAdminDocs(){
       return '<tr><td>'+icon+' '+d.name+'</td><td><span class="badge info">'+d.year+'</span></td><td>'+sz+'</td><td>'+dt+'</td><td><button class="btn-danger btn-sm" onclick="deleteDocument(\''+d.id+'\')" title="Delete">✕</button></td></tr>';
     }).join('')+'</tbody></table>';
 }
+
+// ===== GALLERY =====
+function uploadGallery() {
+  var title = document.getElementById('galTitle').value.trim();
+  var files = document.getElementById('galFiles').files;
+  var a = document.getElementById('galleryAlert');
+  if (!title || !files.length) { 
+    a.className = 'alert err show'; 
+    a.textContent = '❌ Please enter a title and select images'; 
+    setTimeout(() => a.classList.remove('show'), 3000); 
+    return; 
+  }
+  
+  var albums = JSON.parse(localStorage.getItem('dc_gallery') || '[]');
+  var images = [];
+  var count = 0;
+  
+  Array.from(files).forEach(function(file) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      images.push(e.target.result);
+      count++;
+      if (count === files.length) {
+        albums.unshift({
+          id: Date.now(),
+          title: title,
+          images: images,
+          date: new Date().toISOString()
+        });
+        try {
+          localStorage.setItem('dc_gallery', JSON.stringify(albums));
+          a.className = 'alert ok show';
+          a.textContent = '✓ Album "' + title + '" created with ' + count + ' images!';
+          document.getElementById('galTitle').value = '';
+          document.getElementById('galFiles').value = '';
+          renderAdminGal();
+        } catch (err) {
+          a.className = 'alert err show';
+          a.textContent = '❌ Storage full! Try uploading fewer or smaller images.';
+        }
+        setTimeout(() => a.classList.remove('show'), 3000);
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function deleteAlbum(id) {
+  if (!confirm('Delete this entire album?')) return;
+  var albums = JSON.parse(localStorage.getItem('dc_gallery') || '[]');
+  albums = albums.filter(a => a.id !== id);
+  localStorage.setItem('dc_gallery', JSON.stringify(albums));
+  renderAdminGal();
+}
+
+function renderAdminGal() {
+  var list = document.getElementById('adminGalList');
+  if (!list) return;
+  var albums = JSON.parse(localStorage.getItem('dc_gallery') || '[]');
+  if (!albums.length) {
+    list.innerHTML = '<p style="color:var(--text2);font-size:14px">No albums uploaded yet.</p>';
+    return;
+  }
+  list.innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem">' +
+    albums.map(function(a) {
+      return '<div class="panel" style="padding:10px;margin-bottom:0">' +
+        '<div style="height:120px;background:#eee;border-radius:8px;overflow:hidden;margin-bottom:8px">' +
+        '<img src="' + a.images[0] + '" style="width:100%;height:100%;object-fit:cover">' +
+        '</div>' +
+        '<div style="font-weight:700;font-size:14px;margin-bottom:4px">' + a.title + '</div>' +
+        '<div style="font-size:12px;color:var(--text2);margin-bottom:8px">' + a.images.length + ' Photos</div>' +
+        '<button class="btn-danger btn-sm" style="width:100%" onclick="deleteAlbum(' + a.id + ')">Delete Album</button>' +
+        '</div>';
+    }).join('') + '</div>';
+}
+
+// Update auto-login to include gallery render
+const originalAutoLogin = window.onload;
+window.addEventListener('load', () => {
+  if (sessionStorage.getItem('dc_admin')==='1') {
+    renderAdminGal();
+  }
+});
 </script>
 
 <!-- GOOGLE TRANSLATE -->
