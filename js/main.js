@@ -86,11 +86,38 @@ document.querySelectorAll('.scheme-card').forEach(c => {
   }, {threshold:.18}).observe(c);
 });
 
-// ===== CALCULATOR =====
-const RATES = {
+// ===== CALCULATOR & RATES =====
+let RATES = {
   fd: {1:8, 2:9, 3:10.5, 5:10.5},
   rd: {1:8, 2:9, 3:10, 5:10}
 };
+
+function loadDynamicRates() {
+  const stored = localStorage.getItem('dc_rates');
+  if (stored) {
+    const r = JSON.parse(stored);
+    RATES.fd = {
+      1: parseFloat(r.fd_1g || 8),
+      2: parseFloat(r.fd_2g || 9),
+      3: parseFloat(r.fd_3g || 10.5),
+      5: parseFloat(r.fd_3g || 10.5) // Fallback for 5yr
+    };
+    RATES.rd = {
+      1: parseFloat(r.rd_12 || 8),
+      2: parseFloat(r.rd_24 || 9),
+      3: parseFloat(r.rd_36 || 10),
+      5: parseFloat(r.rd_36 || 10)
+    };
+    // Special case for Senior rates in JS logic (handled in calcUpdate)
+    window.seniorRates = {
+      1: parseFloat(r.fd_1s || 8.5),
+      2: parseFloat(r.fd_2s || 9.5),
+      3: parseFloat(r.fd_3s || 11)
+    };
+  }
+}
+loadDynamicRates();
+
 let cScheme = 'fd';
 function switchScheme(s, btn) {
   cScheme = s;
@@ -103,8 +130,18 @@ function calcUpdate() {
   const amt = parseInt(document.getElementById('cRange').value);
   const ten = parseInt(document.getElementById('cTenure').value);
   const senior = document.getElementById('cSenior').checked;
+  
   let rate = RATES[cScheme][ten] || RATES[cScheme][Object.keys(RATES[cScheme]).filter(k=>k<=ten).sort().pop()] || RATES[cScheme][1];
-  if (senior && cScheme === 'fd') rate += 0.5;
+  
+  // Apply dynamic senior rates if available
+  if (senior && cScheme === 'fd') {
+    if (window.seniorRates && window.seniorRates[ten]) {
+      rate = window.seniorRates[ten];
+    } else {
+      rate += 0.5; // Fallback
+    }
+  }
+  
   document.getElementById('cAmt').textContent = fmtINR(amt);
   const interest = amt * rate * ten / 100;
   const total = amt + interest;
@@ -112,7 +149,7 @@ function calcUpdate() {
   document.getElementById('rPrin').textContent = fmtINR(amt);
   document.getElementById('rInt').textContent = fmtINR(interest);
   document.getElementById('rTotal').textContent = fmtINR(total);
-  document.getElementById('rGrowth').textContent = `📈 ಬೆಳವಣಿಗೆ: +${growth}% in ${ten} year${ten>1?'s':''} at ${rate}% p.a.${senior?' (Senior Citizen Rate)':''}`;
+  document.getElementById('rGrowth').textContent = `📈 Growth: +${growth}% in ${ten} year${ten>1?'s':''} at ${rate}% p.a.${senior?' (Senior Citizen Rate)':''}`;
 }
 calcUpdate();
 
@@ -120,62 +157,104 @@ calcUpdate();
 let cIdx = 0;
 const slides = document.querySelectorAll('.test-card');
 const dotsCont = document.getElementById('cDots');
-slides.forEach((_,i) => {
-  const d = document.createElement('button');
-  d.className = 'c-dot' + (i===0?' active':'');
-  d.onclick = () => goSlide(i);
-  dotsCont.appendChild(d);
-});
-function goSlide(idx) {
-  slides[cIdx].classList.remove('active');
-  dotsCont.children[cIdx].classList.remove('active');
-  cIdx = idx;
-  slides[cIdx].classList.add('active');
-  dotsCont.children[cIdx].classList.add('active');
+if (slides.length > 0 && dotsCont) {
+  slides.forEach((_,i) => {
+    const d = document.createElement('button');
+    d.className = 'c-dot' + (i===0?' active':'');
+    d.onclick = () => goSlide(i);
+    dotsCont.appendChild(d);
+  });
+  function goSlide(idx) {
+    slides[cIdx].classList.remove('active');
+    dotsCont.children[cIdx].classList.remove('active');
+    cIdx = idx;
+    slides[cIdx].classList.add('active');
+    dotsCont.children[cIdx].classList.add('active');
+  }
+  setInterval(() => goSlide((cIdx+1) % slides.length), 4500);
 }
-setInterval(() => goSlide((cIdx+1) % slides.length), 4500);
 
 // ===== NOTIFICATION CAROUSEL =====
-const NOTIFS = [
-  {type:'success', icon:'✓', title:'ಬಡ್ಡಿ ದರ ನವೀಕರಣ! / Interest Rate Update', msg:'FD 3 ವರ್ಷ+: 10.5% | ಹಿರಿಯ ನಾಗರಿಕರು: 11% — 13ನೇ ವಾರ್ಷಿಕೋತ್ಸವ ವಿಶೇಷ!', badge:'ಈಗ'},
-  {type:'alert', icon:'📅', title:'ಸಾಮಾನ್ಯ ಸಭೆ / Annual Meeting', msg:'14-09-2025, ಬೆಳಿಗ್ಗೆ 10:30 — ಸುವರ್ಣ ಸಹಕಾರ ಭವನ, ತೀರ್ಥಹಳ್ಳಿ', badge:'ಪ್ರಮುಖ ಸೂಚನೆ'},
-  {type:'info', icon:'🌿', title:'ಭವಿಷ್ಯ ನಿಧಿ / Future Fund Scheme', msg:'₹500/ತಿಂಗಳು → 60 ತಿಂಗಳಲ್ಲಿ ₹25,000 ಪಡೆಯಿರಿ!', badge:'ಹೊಸ ಯೋಜನೆ'},
+const DEFAULT_NOTIFS = [
+  {type:'success', icon:'✓', title:'Interest Rate Update', msg:'FD 3 Year+: 10.5% | Senior Citizens: 11% — Anniversary Special!', badge:'Now'},
+  {type:'alert', icon:'📅', title:'Annual Meeting', msg:'14-09-2025, 10:30 AM — Suvarna Sahakara Bhavan, Thirthahalli', badge:'Important'},
 ];
 
-// Load admin-created notifications too
-const storedNotifs = JSON.parse(localStorage.getItem('dc_notifs') || '[]');
-const allNotifs = [...NOTIFS, ...storedNotifs.map(n => ({...n, badge: n.time || 'ಹೊಸದು'}))];
+function initNotifications() {
+  const storedNotifs = JSON.parse(localStorage.getItem('dc_notifs') || '[]');
+  const allNotifs = storedNotifs.length > 0 ? storedNotifs : DEFAULT_NOTIFS;
 
-const notifSlider = document.getElementById('notifSlider');
-const notifDotsC = document.getElementById('notifDots');
-let nIdx = 0;
+  const notifSlider = document.getElementById('notifSlider');
+  const notifDotsC = document.getElementById('notifDots');
+  if (!notifSlider) return;
 
-allNotifs.forEach((n, i) => {
-  const slide = document.createElement('div');
-  slide.className = 'notif-slide' + (i === 0 ? ' active' : '');
-  slide.innerHTML = `<div class="notif-card ${n.type}"><div class="nc-icon">${n.icon}</div><div class="nc-body"><div class="nc-title">${n.title}</div><div class="nc-msg">${n.msg}</div><span class="nc-badge">${n.badge}</span></div></div>`;
-  notifSlider.appendChild(slide);
-  const dot = document.createElement('button');
-  dot.className = 'notif-dot' + (i === 0 ? ' active' : '');
-  dot.onclick = () => goNotif(i);
-  notifDotsC.appendChild(dot);
-});
+  notifSlider.innerHTML = '';
+  if (notifDotsC) notifDotsC.innerHTML = '';
+  let nIdx = 0;
 
-// Add arrows
-notifSlider.insertAdjacentHTML('beforeend', '<button class="notif-arrow left" onclick="goNotif((nIdx-1+allNotifs.length)%allNotifs.length)">❮</button><button class="notif-arrow right" onclick="goNotif((nIdx+1)%allNotifs.length)">❯</button>');
+  allNotifs.forEach((n, i) => {
+    const slide = document.createElement('div');
+    slide.className = 'notif-slide' + (i === 0 ? ' active' : '');
+    slide.innerHTML = `<div class="notif-card ${n.type}"><div class="nc-icon">${n.icon}</div><div class="nc-body"><div class="nc-title">${n.title}</div><div class="nc-msg">${n.msg}</div><span class="nc-badge">${n.badge || 'New'}</span></div></div>`;
+    notifSlider.appendChild(slide);
+    
+    if (notifDotsC) {
+      const dot = document.createElement('button');
+      dot.className = 'notif-dot' + (i === 0 ? ' active' : '');
+      dot.onclick = () => goNotif(i);
+      notifDotsC.appendChild(dot);
+    }
+  });
 
-function goNotif(idx) {
-  const slides = document.querySelectorAll('.notif-slide');
-  const dots = document.querySelectorAll('.notif-dot');
-  slides[nIdx].classList.remove('active');
-  slides[nIdx].classList.add('prev');
-  dots[nIdx].classList.remove('active');
-  setTimeout(() => slides[nIdx === idx ? nIdx : (nIdx)].classList.remove('prev'), 500);
-  nIdx = idx;
-  slides[nIdx].classList.add('active');
-  dots[nIdx].classList.add('active');
+  // Add arrows
+  notifSlider.insertAdjacentHTML('beforeend', '<button class="notif-arrow left" onclick="window.goNotif((window.nIdx-1+'+allNotifs.length+')%'+allNotifs.length+')">❮</button><button class="notif-arrow right" onclick="window.goNotif((window.nIdx+1)%'+allNotifs.length+')">❯</button>');
+
+  window.nIdx = 0;
+  window.goNotif = function(idx) {
+    const slides = document.querySelectorAll('.notif-slide');
+    const dots = document.querySelectorAll('.notif-dot');
+    if (!slides[window.nIdx]) return;
+    slides[window.nIdx].classList.remove('active');
+    slides[window.nIdx].classList.add('prev');
+    if (dots[window.nIdx]) dots[window.nIdx].classList.remove('active');
+    
+    const prevIdx = window.nIdx;
+    setTimeout(() => { if (slides[prevIdx]) slides[prevIdx].classList.remove('prev') }, 500);
+    
+    window.nIdx = idx;
+    if (slides[window.nIdx]) slides[window.nIdx].classList.add('active');
+    if (dots[window.nIdx]) dots[window.nIdx].classList.add('active');
+  }
+  
+  if (allNotifs.length > 1) {
+    setInterval(() => window.goNotif((window.nIdx + 1) % allNotifs.length), 5000);
+  }
 }
-setInterval(() => goNotif((nIdx + 1) % allNotifs.length), 5000);
+initNotifications();
+
+
+function updateHomepageLabels() {
+  const stored = localStorage.getItem('dc_rates');
+  if (!stored) return;
+  const r = JSON.parse(stored);
+  
+  // Update Hero Stat
+  const heroFd = document.querySelector('.hero-stat .hero-stat-num');
+  if (heroFd && heroFd.textContent.includes('%')) {
+    heroFd.textContent = (r.fd_3s || 10.5) + '%';
+  }
+
+  // Update Scheme Cards (heuristic based on order)
+  const rateNums = document.querySelectorAll('.sc-rate-num');
+  if (rateNums.length >= 3) {
+    rateNums[0].textContent = (r.fd_3g || 10) + '%'; // FD
+    rateNums[1].textContent = (r.rd_36 || 10) + '%'; // RD
+    // Pigmy remains 3% usually but could be made dynamic too
+  }
+}
+window.addEventListener('load', () => {
+  updateHomepageLabels();
+});
 
 // ===== TOAST =====
 function toast(msg, type='ok') {
