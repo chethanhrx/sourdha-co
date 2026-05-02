@@ -90,10 +90,10 @@ The administrative dashboard is located at `/admin`.
 
 This project was proudly designed and developed by the **Department of BCA, Tunga Mahavidyalaya (Batch 2023-26)**.
 
-### Team Members
+#### Team Members
 - [Chethan Kumar H.R](https://github.com/chethanhrx)
-- [Raajath B.N] (https://github.com/Rajathacharya24)
-- [Harsha] (https://github.com/Harxshz7)
+- [Raajath B.N](https://github.com/Rajathacharya24)
+- [Harsha](https://github.com/Harxshz7)
 - [ShreeNidhi]
 - [Abhishek C.P]
 - [Nandan H.N]
