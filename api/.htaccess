@@ -1,0 +1,17 @@
+# Protect API directory
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    # Deny access to config and init files directly
+    RewriteRule ^config\.php$ - [F,L]
+    RewriteRule ^init\.php$ - [F,L]
+</IfModule>
+
+# Deny directory listing
+Options -Indexes
+
+# Protect against common exploits
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-XSS-Protection "1; mode=block"
+</IfModule>

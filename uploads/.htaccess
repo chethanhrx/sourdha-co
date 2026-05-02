@@ -1,0 +1,19 @@
+# Protect uploads directory
+Options -Indexes
+
+# Deny execution of PHP scripts in uploads
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+
+<FilesMatch "\.(php|php3|php4|php5|phtml|pl|py|jsp|asp|sh|cgi)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Allow only image and PDF files
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteRule !\.(jpg|jpeg|png|gif|webp|pdf)$ - [F,L]
+</IfModule>

@@ -29,7 +29,7 @@ body{font-family:var(--ff-body);background:var(--bg);color:var(--text);line-heig
 .lang-btn.active{background:var(--grad-main);border-color:transparent;color:#fff;box-shadow:var(--sh-md)}
 
 /* NAV */
-nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;padding:0 clamp(1rem,3vw,2rem);display:flex;align-items:center;justify-content:space-between;transition:.3s}
+nav{position:fixed;top:0;left:0;right:0;z-index:100000;height:68px;padding:0 clamp(1rem,3vw,2rem);display:flex;align-items:center;justify-content:space-between;transition:.3s}
 nav.scrolled{background:rgba(26,42,90,.97);backdrop-filter:blur(20px);box-shadow:var(--sh-lg)}
 .nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
 .nav-logo img{width:auto;height:48px;border-radius:10px;object-fit:contain;border:none}
@@ -46,10 +46,11 @@ nav.scrolled{background:rgba(26,42,90,.97);backdrop-filter:blur(20px);box-shadow
 .hamburger{display:none;background:none;border:none;color:#fff;font-size:24px;cursor:pointer;padding:6px}
 
 /* MOBILE MENU */
-.mob-menu{display:none;position:fixed;inset:0;z-index:999;background:var(--navy-dark);padding:100px 2rem 2rem;flex-direction:column;gap:1.5rem}
-.mob-menu.open{display:flex}
+.mob-menu{position:fixed;inset:0;z-index:99999;background:var(--navy-dark);padding:100px 2rem 2rem;flex-direction:column;gap:1.5rem;opacity:0;pointer-events:none;transition:opacity .3s ease;display:flex}
+.mob-menu.open{opacity:1;pointer-events:all}
 .mob-menu a{color:rgba(255,255,255,.85);text-decoration:none;font-size:22px;font-weight:600;padding:.75rem 0;border-bottom:1px solid rgba(255,255,255,.1);font-family:var(--ff-kn);display:flex;align-items:center;gap:10px}
-.mob-close{position:absolute;top:22px;right:22px;background:none;border:none;color:#fff;font-size:28px;cursor:pointer}
+.mob-close{position:absolute;top:20px;right:20px;background:rgba(255,255,255,.1);border:none;color:#fff;font-size:32px;cursor:pointer;width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:.2s;z-index:100000}
+.mob-close:active{background:rgba(255,255,255,.3);transform:scale(0.9)}
 
 /* HERO */
 .hero{min-height:88vh;background:linear-gradient(135deg,#0F1636 0%,#1A2A5A 45%,#8B1428 100%);position:relative;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden}

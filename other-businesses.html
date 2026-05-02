@@ -102,7 +102,7 @@
   </ul>
   <div style="display:flex;align-items:center;gap:10px">
     <a href="admin/" style="background:var(--grad-main);color:#fff;padding:6px 14px;border-radius:50px;font-size:12px;font-weight:600;text-decoration:none;display:none" id="adminLink">Admin</a>
-    <button class="hamburger" onclick="openMob()">☰</button>
+    <button class="hamburger" onclick="toggleMob()">☰</button>
   </div>
 </nav>
 
@@ -164,29 +164,49 @@
       }
     ];
 
-    function renderBusinesses() {
+    async function renderBusinesses() {
       const container = document.getElementById('bizContainer');
-      const stored = localStorage.getItem('dc_businesses');
-      const businesses = (stored && JSON.parse(stored).length > 0) ? JSON.parse(stored) : defaultBusinesses;
-
-      container.innerHTML = businesses.map(b => `
-        <div class="biz-card">
-          <div class="biz-card-header">
-            <div class="biz-icon">${b.icon || '💼'}</div>
-            <div class="biz-card-title">${b.name}</div>
-            <p class="biz-card-subtitle">Service provided by the society</p>
-          </div>
-          <div class="biz-card-body">
-            <ul class="biz-features">
-              ${b.features.map(f => `<li><span class="biz-check">✓</span>${f}</li>`).join('')}
-            </ul>
-            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-              <span class="biz-price">Best Rates Guaranteed</span>
-              <a href="index.html#contact" class="biz-cta">Inquire Now →</a>
+      
+      try {
+        const res = await fetch('api/businesses.php');
+        const data = await res.json();
+        
+        if (data.success && data.businesses && data.businesses.length > 0) {
+          container.innerHTML = data.businesses.map(b => `
+            <div class="biz-card">
+              <div style="height:200px; overflow:hidden">
+                <img src="${b.image_path || 'assets/images/logo-english.png'}" style="width:100%; height:100%; object-fit:cover" alt="${b.name}">
+              </div>
+              <div class="biz-card-header" style="background:none; padding-bottom:0">
+                <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px">
+                  <div class="biz-icon" style="margin:0; width:40px; height:40px; font-size:20px; background:rgba(212,168,82,.1); color:var(--gold-dark)">${b.icon || '💼'}</div>
+                  <div class="biz-card-title">${b.name}</div>
+                </div>
+                <p style="font-size:13px; color:var(--text2); font-family:var(--ff-kn); line-height:1.5">${b.description || ''}</p>
+              </div>
+              <div class="biz-card-body">
+                <ul class="biz-features">
+                  ${b.features.map(f => `<li><span class="biz-check">✓</span>${f}</li>`).join('')}
+                </ul>
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                  <span class="biz-price">ಸದಸ್ಯರಿಗೆ ರಿಯಾಯಿತಿ ಉಂಟು</span>
+                  <a href="index.html#contact" class="biz-cta">Inquire Now →</a>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      `).join('');
+          `).join('');
+        } else {
+          container.innerHTML = `
+            <div style="grid-column:1/-1; text-align:center; padding:4rem 0">
+              <div style="font-size:4rem; margin-bottom:1.5rem">🏢</div>
+              <h3 style="font-family:var(--ff-kn); color:var(--navy); font-size:24px">ಇತರೆ ವ್ಯವಹಾರಗಳು ಶೀಘ್ರದಲ್ಲೇ ಬರಲಿವೆ</h3>
+              <p style="color:var(--text2); margin-top:10px">Other business services will be added soon. Please check back later.</p>
+            </div>
+          `;
+        }
+      } catch(e) {
+        console.error('Failed to load businesses:', e);
+      }
     }
     renderBusinesses();
     </script>

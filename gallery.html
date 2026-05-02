@@ -75,7 +75,7 @@
   </ul>
   <div style="display:flex;align-items:center;gap:10px">
     <a href="admin/" style="background:var(--grad-main);color:#fff;padding:6px 14px;border-radius:50px;font-size:12px;font-weight:600;text-decoration:none;display:none" id="adminLink">Admin</a>
-    <button class="hamburger" onclick="openMob()">☰</button>
+    <button class="hamburger" onclick="toggleMob()">☰</button>
   </div>
 </nav>
 
@@ -136,10 +136,16 @@ let curImgIdx = 0;
 function openMob() { document.getElementById('mobMenu').classList.add('open'); }
 function closeMob() { document.getElementById('mobMenu').classList.remove('open'); }
 
-function renderGallery() {
+async function renderGallery() {
   const container = document.getElementById('galleryContainer');
-  const stored = localStorage.getItem('dc_gallery');
-  if (!stored || JSON.parse(stored).length === 0) {
+  
+  try {
+    const res = await fetch('api/gallery.php');
+    const data = await res.json();
+    allAlbums = data.success ? data.albums : [];
+  } catch(e) { allAlbums = []; }
+  
+  if (!allAlbums.length) {
     container.innerHTML = '<div style="text-align:center;padding:4rem 0;color:var(--text2)">' +
       '<div style="font-size:4rem;margin-bottom:1rem">🖼️</div>' +
       '<p style="font-family:var(--ff-kn);font-size:18px">ಇನ್ನೂ ಯಾವುದೇ ಫೋಟೋಗಳನ್ನು ಸೇರಿಸಲಾಗಿಲ್ಲ.</p>' +
@@ -147,7 +153,6 @@ function renderGallery() {
     return;
   }
 
-  allAlbums = JSON.parse(stored);
   let html = '';
   allAlbums.forEach((album, aIdx) => {
     html += `
@@ -159,7 +164,7 @@ function renderGallery() {
         <div class="image-grid">
           ${album.images.map((img, iIdx) => `
             <div class="gal-img-wrap" onclick="openLB(${aIdx}, ${iIdx})">
-              <img src="${img}" loading="lazy">
+              <img src="${img.file_path}" loading="lazy">
               <div class="gal-img-overlay">🔍</div>
             </div>
           `).join('')}
@@ -170,10 +175,14 @@ function renderGallery() {
   container.innerHTML = html;
 }
 
+function getImgSrc(albumIdx, imgIdx) {
+  return allAlbums[albumIdx].images[imgIdx].file_path;
+}
+
 function openLB(aIdx, iIdx) {
   curAlbumIdx = aIdx;
   curImgIdx = iIdx;
-  document.getElementById('lbImg').src = allAlbums[curAlbumIdx].images[curImgIdx];
+  document.getElementById('lbImg').src = getImgSrc(curAlbumIdx, curImgIdx);
   document.getElementById('lightbox').classList.add('active');
   document.body.style.overflow = 'hidden';
 }
@@ -185,12 +194,12 @@ function closeLB() {
 
 function nextImg() {
   curImgIdx = (curImgIdx + 1) % allAlbums[curAlbumIdx].images.length;
-  document.getElementById('lbImg').src = allAlbums[curAlbumIdx].images[curImgIdx];
+  document.getElementById('lbImg').src = getImgSrc(curAlbumIdx, curImgIdx);
 }
 
 function prevImg() {
   curImgIdx = (curImgIdx - 1 + allAlbums[curAlbumIdx].images.length) % allAlbums[curAlbumIdx].images.length;
-  document.getElementById('lbImg').src = allAlbums[curAlbumIdx].images[curImgIdx];
+  document.getElementById('lbImg').src = getImgSrc(curAlbumIdx, curImgIdx);
 }
 
 // Close on background click

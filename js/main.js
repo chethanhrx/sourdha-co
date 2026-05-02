@@ -64,8 +64,30 @@ window.addEventListener('scroll', () => {
 });
 
 // ===== MOBILE MENU =====
-function openMob() { document.getElementById('mobMenu').classList.add('open'); }
-function closeMob() { document.getElementById('mobMenu').classList.remove('open'); }
+function toggleMob() {
+  const menu = document.getElementById('mobMenu');
+  if (menu.classList.contains('open')) {
+    closeMob();
+  } else {
+    openMob();
+  }
+}
+function openMob() { 
+  document.getElementById('mobMenu').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeMob() { 
+  document.getElementById('mobMenu').classList.remove('open');
+  document.body.style.overflow = 'auto';
+}
+
+// Close mobile menu when clicking outside or touching outside
+const handleOutsideClick = function(e) {
+  const menu = document.getElementById('mobMenu');
+  if (e.target === menu) closeMob();
+};
+window.addEventListener('click', handleOutsideClick);
+window.addEventListener('touchstart', handleOutsideClick, {passive: true});
 
 // ===== PARTICLES =====
 const pc = document.getElementById('particles');
@@ -92,29 +114,34 @@ let RATES = {
   rd: {1:8, 2:9, 3:10, 5:10}
 };
 
-function loadDynamicRates() {
-  const stored = localStorage.getItem('dc_rates');
-  if (stored) {
-    const r = JSON.parse(stored);
-    RATES.fd = {
-      1: parseFloat(r.fd_1g || 8),
-      2: parseFloat(r.fd_2g || 9),
-      3: parseFloat(r.fd_3g || 10.5),
-      5: parseFloat(r.fd_3g || 10.5) // Fallback for 5yr
-    };
-    RATES.rd = {
-      1: parseFloat(r.rd_12 || 8),
-      2: parseFloat(r.rd_24 || 9),
-      3: parseFloat(r.rd_36 || 10),
-      5: parseFloat(r.rd_36 || 10)
-    };
-    // Special case for Senior rates in JS logic (handled in calcUpdate)
-    window.seniorRates = {
-      1: parseFloat(r.fd_1s || 8.5),
-      2: parseFloat(r.fd_2s || 9.5),
-      3: parseFloat(r.fd_3s || 11)
-    };
-  }
+async function loadDynamicRates() {
+  try {
+    const res = await fetch('api/rates.php');
+    const data = await res.json();
+    if (data.success && data.rates) {
+      const r = data.rates;
+      RATES.fd = {
+        1: r.fd_1g?.value || 8,
+        2: r.fd_2g?.value || 9,
+        3: r.fd_3g?.value || 10.5,
+        5: r.fd_3g?.value || 10.5
+      };
+      RATES.rd = {
+        1: r.rd_12?.value || 8,
+        2: r.rd_24?.value || 9,
+        3: r.rd_36?.value || 10,
+        5: r.rd_36?.value || 10
+      };
+      window.seniorRates = {
+        1: r.fd_1s?.value || 8.5,
+        2: r.fd_2s?.value || 9.5,
+        3: r.fd_3s?.value || 11
+      };
+      // Update UI labels
+      updateHomepageLabels(data.rates);
+      calcUpdate();
+    }
+  } catch(e) { console.log('Rates load failed, using defaults'); }
 }
 loadDynamicRates();
 
@@ -175,14 +202,25 @@ if (slides.length > 0 && dotsCont) {
 }
 
 // ===== NOTIFICATION CAROUSEL =====
-const DEFAULT_NOTIFS = [
-  {type:'success', icon:'✓', title:'Interest Rate Update', msg:'FD 3 Year+: 10.5% | Senior Citizens: 11% — Anniversary Special!', badge:'Now'},
-  {type:'alert', icon:'📅', title:'Annual Meeting', msg:'14-09-2025, 10:30 AM — Suvarna Sahakara Bhavan, Thirthahalli', badge:'Important'},
-];
+async function initNotifications() {
+  let allNotifs = [];
+  try {
+    const res = await fetch('api/notifications.php');
+    const data = await res.json();
+    if (data.success && data.notifications) {
+      allNotifs = data.notifications.map(n => ({
+        type: n.type, icon: n.icon === 'check' ? '✓' : n.icon === 'calendar' ? '📅' : '🔔',
+        title: n.title, msg: n.message, badge: n.badge
+      }));
+    }
+  } catch(e) {}
 
-function initNotifications() {
-  const storedNotifs = JSON.parse(localStorage.getItem('dc_notifs') || '[]');
-  const allNotifs = storedNotifs.length > 0 ? storedNotifs : DEFAULT_NOTIFS;
+  if (allNotifs.length === 0) {
+    allNotifs = [
+      {type:'success', icon:'✓', title:'Interest Rate Update', msg:'FD 3 Year+: 10.5% | Senior Citizens: 11% — Anniversary Special!', badge:'Now'},
+      {type:'alert', icon:'📅', title:'Annual Meeting', msg:'14-09-2025, 10:30 AM — Suvarna Sahakara Bhavan, Thirthahalli', badge:'Important'},
+    ];
+  }
 
   const notifSlider = document.getElementById('notifSlider');
   const notifDotsC = document.getElementById('notifDots');
@@ -190,7 +228,6 @@ function initNotifications() {
 
   notifSlider.innerHTML = '';
   if (notifDotsC) notifDotsC.innerHTML = '';
-  let nIdx = 0;
 
   allNotifs.forEach((n, i) => {
     const slide = document.createElement('div');
@@ -206,7 +243,6 @@ function initNotifications() {
     }
   });
 
-  // Add arrows
   notifSlider.insertAdjacentHTML('beforeend', '<button class="notif-arrow left" onclick="window.goNotif((window.nIdx-1+'+allNotifs.length+')%'+allNotifs.length+')">❮</button><button class="notif-arrow right" onclick="window.goNotif((window.nIdx+1)%'+allNotifs.length+')">❯</button>');
 
   window.nIdx = 0;
@@ -217,10 +253,8 @@ function initNotifications() {
     slides[window.nIdx].classList.remove('active');
     slides[window.nIdx].classList.add('prev');
     if (dots[window.nIdx]) dots[window.nIdx].classList.remove('active');
-    
     const prevIdx = window.nIdx;
     setTimeout(() => { if (slides[prevIdx]) slides[prevIdx].classList.remove('prev') }, 500);
-    
     window.nIdx = idx;
     if (slides[window.nIdx]) slides[window.nIdx].classList.add('active');
     if (dots[window.nIdx]) dots[window.nIdx].classList.add('active');
@@ -233,28 +267,50 @@ function initNotifications() {
 initNotifications();
 
 
-function updateHomepageLabels() {
-  const stored = localStorage.getItem('dc_rates');
-  if (!stored) return;
-  const r = JSON.parse(stored);
+function updateHomepageLabels(rates) {
+  if (!rates) return;
   
-  // Update Hero Stat
+  // Hero section rate
   const heroFd = document.querySelector('.hero-stat .hero-stat-num');
   if (heroFd && heroFd.textContent.includes('%')) {
-    heroFd.textContent = (r.fd_3s || 10.5) + '%';
+    heroFd.textContent = (rates.fd_3s?.value || 10.5) + '%';
   }
 
-  // Update Scheme Cards (heuristic based on order)
-  const rateNums = document.querySelectorAll('.sc-rate-num');
-  if (rateNums.length >= 3) {
-    rateNums[0].textContent = (r.fd_3g || 10) + '%'; // FD
-    rateNums[1].textContent = (r.rd_36 || 10) + '%'; // RD
-    // Pigmy remains 3% usually but could be made dynamic too
+  // Scheme cards main rates
+  const scRates = document.querySelectorAll('.sc-rate-num');
+  if (scRates.length >= 2) {
+    scRates[0].textContent = (rates.fd_3g?.value || 10) + '%'; // FD card
+    scRates[1].textContent = (rates.rd_36?.value || 10) + '%'; // RD card
+  }
+
+  // FD Table Update
+  const fdTable = document.querySelector('#schemes .scheme-card:nth-child(1) table');
+  if (fdTable) {
+    const rows = fdTable.querySelectorAll('tr');
+    if (rows.length >= 5) {
+      // 3 Year+
+      rows[1].cells[1].textContent = (rates.fd_3g?.value || 10) + '%';
+      rows[1].cells[2].textContent = (rates.fd_3s?.value || 10.5) + '%';
+      // 2 Year+
+      rows[2].cells[1].textContent = (rates.fd_2g?.value || 9) + '%';
+      rows[2].cells[2].textContent = (rates.fd_2s?.value || 9.5) + '%';
+      // 1 Year+
+      rows[3].cells[1].textContent = (rates.fd_1g?.value || 8) + '%';
+      rows[3].cells[2].textContent = (rates.fd_1s?.value || 8.5) + '%';
+    }
+  }
+
+  // RD Table Update
+  const rdTable = document.querySelector('#schemes .scheme-card:nth-child(2) table');
+  if (rdTable) {
+    const rows = rdTable.querySelectorAll('tr');
+    if (rows.length >= 4) {
+      rows[1].cells[1].textContent = (rates.rd_36?.value || 10) + '%';
+      rows[2].cells[1].textContent = (rates.rd_24?.value || 9) + '%';
+      rows[3].cells[1].textContent = (rates.rd_12?.value || 8) + '%';
+    }
   }
 }
-window.addEventListener('load', () => {
-  updateHomepageLabels();
-});
 
 // ===== TOAST =====
 function toast(msg, type='ok') {
@@ -275,7 +331,7 @@ function validateF(id, errId, fn) {
   er.classList.toggle('show', !ok);
   return ok;
 }
-function submitForm() {
+async function submitForm() {
   const n = validateF('fN','eN', v=>v.length>=3);
   const e = validateF('fE','eE', v=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v));
   const p = validateF('fP','eP', v=>/^[6-9]\d{9}$/.test(v.replace(/\D/g,'')));
@@ -283,9 +339,27 @@ function submitForm() {
   if (!n||!e||!p||!m) return;
   const btn = document.getElementById('fBtn');
   btn.disabled=true; btn.textContent='⏳ ಕಳುಹಿಸಲಾಗುತ್ತಿದೆ...';
-  setTimeout(()=>{
-    btn.disabled=false; btn.textContent='📨 ಸಂದೇಶ ಕಳುಹಿಸಿ';
-    ['fN','fE','fP','fM'].forEach(id=>document.getElementById(id).value='');
-    toast('ಸಂದೇಶ ಕಳುಹಿಸಲಾಗಿದೆ! ನಾವು ಶೀಘ್ರದಲ್ಲೇ ಸಂಪರ್ಕಿಸುತ್ತೇವೆ. 🙏','ok');
-  },1500);
+
+  try {
+    const form = new FormData();
+    form.append('action', 'submit');
+    form.append('name', document.getElementById('fN').value.trim());
+    form.append('email', document.getElementById('fE').value.trim());
+    form.append('phone', document.getElementById('fP').value.trim());
+    form.append('message', document.getElementById('fM').value.trim());
+
+    const res = await fetch('api/contacts.php', { method: 'POST', body: form });
+    const data = await res.json();
+
+    if (data.success) {
+      ['fN','fE','fP','fM'].forEach(id=>document.getElementById(id).value='');
+      toast('ಸಂದೇಶ ಕಳುಹಿಸಲಾಗಿದೆ! ನಾವು ಶೀಘ್ರದಲ್ಲೇ ಸಂಪರ್ಕಿಸುತ್ತೇವೆ. 🙏','ok');
+    } else {
+      toast(data.error || 'Failed to send message', 'err');
+    }
+  } catch(ex) {
+    toast('Network error. Please try again.', 'err');
+  }
+
+  btn.disabled=false; btn.textContent='📨 ಸಂದೇಶ ಕಳುಹಿಸಿ';
 }

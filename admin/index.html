@@ -332,6 +332,7 @@
       <button class="nav-btn" data-page="gallery"><i class="fas fa-images"></i><span> Gallery</span></button>
       <button class="nav-btn" data-page="business"><i class="fas fa-store"></i><span> Businesses</span></button>
       <div class="nav-section">System</div>
+      <button class="nav-btn" data-page="contacts"><i class="fas fa-envelope"></i><span> Messages</span></button>
       <button class="nav-btn" data-page="settings"><i class="fas fa-cog"></i><span> Settings</span></button>
       <button class="nav-btn" onclick="window.open('../index.html','_blank')"><i class="fas fa-globe"></i><span> Live Site</span></button>
       <button class="nav-btn logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i><span> Logout</span></button>
@@ -375,13 +376,13 @@
       <!-- DOCUMENTS -->
       <div id="page-documents" class="admin-page">
         <div class="page-header"><h1>Document Vault</h1><p>Audit reports, annual statements by fiscal year</p></div>
-        <div class="card-panel"><div class="panel-title"><i class="fas fa-upload"></i> Upload Document</div>
+        <div class="card-panel"><div class="panel-title"><i class="fas fa-upload"></i> Upload Documents</div>
           <div class="form-two-col">
             <div class="input-group"><label>Financial Year</label><select id="docYear"></select></div>
-            <div class="input-group"><label>Label / Name</label><input type="text" id="docLabel" placeholder="Annual Report 2024"></div>
+            <div class="input-group"><label>Common Label (e.g. Audit Report)</label><input type="text" id="docLabel" placeholder="Annual Report"></div>
           </div>
-          <div class="input-group"><label>File (PDF or Image)</label><input type="file" id="docFile" accept="image/*,application/pdf"></div>
-          <button class="primary-btn" onclick="uploadDocument()"><i class="fas fa-cloud-upload-alt"></i> Upload</button>
+          <div class="input-group"><label>Files (Select multiple PDF/Images/Word/Excel)</label><input type="file" id="docFile" multiple accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx"></div>
+          <button class="primary-btn" onclick="uploadDocument()"><i class="fas fa-cloud-upload-alt"></i> Upload Files</button>
         </div>
         <div id="documentsList"></div>
       </div>
@@ -403,12 +404,20 @@
         <div class="card-panel"><div class="panel-title"><i class="fas fa-briefcase"></i> Add Service</div>
           <div class="form-two-col">
             <div class="input-group"><label>Service Name</label><input type="text" id="bizName" placeholder="Printing Hub"></div>
-            <div class="input-group"><label>Icon (emoji or fontawesome class)</label><input type="text" id="bizIcon" placeholder="🖨️"></div>
+            <div class="input-group"><label>Icon (emoji)</label><input type="text" id="bizIcon" placeholder="🖨️"></div>
           </div>
+          <div class="input-group"><label>Short Description (About Business)</label><textarea id="bizDesc" rows="2" placeholder="Tell us about this service..."></textarea></div>
           <div class="input-group"><label>Key Features (comma separated)</label><input type="text" id="bizFeatures" placeholder="High speed, color print, binding"></div>
+          <div class="input-group"><label>Card Image (Cover photo)</label><input type="file" id="bizImage" accept="image/*"></div>
           <button class="primary-btn" onclick="addBusinessService()"><i class="fas fa-plus"></i> Save Service</button>
         </div>
         <div class="card-panel"><div class="panel-title"><i class="fas fa-list-ul"></i> Existing Services</div><div id="businessList"></div></div>
+      </div>
+
+      <!-- CONTACTS -->
+      <div id="page-contacts" class="admin-page">
+        <div class="page-header"><h1>Contact Submissions</h1><p>Messages from the public contact form</p></div>
+        <div id="contactsList"><div class="card-panel">Loading...</div></div>
       </div>
 
       <!-- SETTINGS -->
@@ -425,14 +434,9 @@
 <div id="toastMsg" class="toast-msg"></div>
 
 <script>
-  // ---------- INITIAL DATA ----------
-  const defaultRates = { fd_3g:10, fd_3s:10.5, fd_2g:9, fd_2s:9.5, rd_36:10, rd_24:9, rd_12:8 };
-  function getRates() { return JSON.parse(localStorage.getItem('dc_rates') || JSON.stringify(defaultRates)); }
-  function saveRatesObj(rates) { localStorage.setItem('dc_rates', JSON.stringify(rates)); }
-
+  const API_BASE = '../api/';
   let currentPage = 'dashboard';
 
-  // Helper toast
   function showToast(text, isErr = false) {
     const toast = document.getElementById('toastMsg');
     toast.style.background = isErr ? '#b91c2c' : '#1e3a5f';
@@ -441,13 +445,46 @@
     setTimeout(() => { toast.style.display = 'none'; }, 2800);
   }
 
-  // AUTH
-  function handleLogin() {
+  // --- API HELPERS ---
+  async function apiGet(endpoint) {
+    try {
+      const res = await fetch(API_BASE + endpoint, { credentials: 'same-origin' });
+      return await res.json();
+    } catch(e) { return { success: false, error: 'Network error' }; }
+  }
+  async function apiPost(endpoint, data) {
+    try {
+      const res = await fetch(API_BASE + endpoint, {
+        method: 'POST', body: data, credentials: 'same-origin'
+      });
+      return await res.json();
+    } catch(e) { return { success: false, error: 'Network error' }; }
+  }
+  async function apiPostJson(endpoint, data) {
+    try {
+      const res = await fetch(API_BASE + endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+        credentials: 'same-origin'
+      });
+      return await res.json();
+    } catch(e) { return { success: false, error: 'Network error' }; }
+  }
+
+  // --- AUTH ---
+  async function handleLogin() {
     const user = document.getElementById('loginUser').value.trim();
     const pass = document.getElementById('loginPass').value;
-    const creds = JSON.parse(localStorage.getItem('dc_admin_creds') || '{"user":"admin","pass":"divya2012"}');
-    if (user === creds.user && pass === creds.pass) {
-      sessionStorage.setItem('dc_admin', '1');
+    if (!user || !pass) { showToast('Enter username and password', true); return; }
+
+    const form = new FormData();
+    form.append('action', 'login');
+    form.append('username', user);
+    form.append('password', pass);
+
+    const res = await apiPost('auth.php', form);
+    if (res.success) {
       initAdminApp();
     } else {
       document.getElementById('loginErr').style.display = 'block';
@@ -455,7 +492,17 @@
     }
   }
 
-  function logout() { sessionStorage.removeItem('dc_admin'); window.location.reload(); }
+  async function logout() {
+    const form = new FormData();
+    form.append('action', 'logout');
+    await apiPost('auth.php', form);
+    window.location.reload();
+  }
+
+  async function checkAuth() {
+    const res = await apiGet('auth.php');
+    if (res.authenticated) initAdminApp();
+  }
 
   function initAdminApp() {
     document.getElementById('loginOverlay').style.display = 'none';
@@ -484,7 +531,6 @@
         currentPage = pageId;
       });
     });
-    // default active
     document.querySelector('.nav-btn[data-page="dashboard"]').classList.add('active');
   }
 
@@ -492,36 +538,487 @@
     const select = document.getElementById('docYear');
     if(!select) return;
     const currentYear = new Date().getFullYear();
-    for(let i = currentYear; i >= 2015; i--) {
+    for(let i = currentYear + 10; i >= 2015; i--) {
       const opt = document.createElement('option');
       opt.value = `${i}-${(i+1).toString().slice(2)}`;
       opt.textContent = `${i}-${i+1}`;
+      if (i === currentYear) opt.selected = true;
       select.appendChild(opt);
     }
   }
 
-  function renderInterestForms() {
-    const rates = getRates();
+  // --- RATES ---
+  async function renderInterestForms() {
+    const res = await apiGet('rates.php');
+    const rates = res.success && res.rates ? res.rates : {};
+
     const fdDiv = document.getElementById('fdRatesContainer');
     fdDiv.innerHTML = `
-      <div class="input-group"><label>3+ Years (General)</label><input type="number" step="0.25" class="rate-input" data-key="fd_3g" value="${rates.fd_3g}"></div>
-      <div class="input-group"><label>3+ Years (Senior)</label><input type="number" step="0.25" class="rate-input" data-key="fd_3s" value="${rates.fd_3s}"></div>
-      <div class="input-group"><label>2+ Years (General)</label><input type="number" step="0.25" class="rate-input" data-key="fd_2g" value="${rates.fd_2g}"></div>
-      <div class="input-group"><label>2+ Years (Senior)</label><input type="number" step="0.25" class="rate-input" data-key="fd_2s" value="${rates.fd_2s}"></div>
+      <div class="input-group"><label>3+ Years (General)</label><input type="number" step="0.25" class="rate-input" data-key="fd_3g" value="${rates.fd_3g?.value ?? 10}"></div>
+      <div class="input-group"><label>3+ Years (Senior)</label><input type="number" step="0.25" class="rate-input" data-key="fd_3s" value="${rates.fd_3s?.value ?? 10.5}"></div>
+      <div class="input-group"><label>2+ Years (General)</label><input type="number" step="0.25" class="rate-input" data-key="fd_2g" value="${rates.fd_2g?.value ?? 9}"></div>
+      <div class="input-group"><label>2+ Years (Senior)</label><input type="number" step="0.25" class="rate-input" data-key="fd_2s" value="${rates.fd_2s?.value ?? 9.5}"></div>
     `;
     const rdDiv = document.getElementById('rdRatesContainer');
     rdDiv.innerHTML = `
-      <div class="input-group"><label>36 Months RD</label><input type="number" step="0.25" class="rate-input" data-key="rd_36" value="${rates.rd_36}"></div>
-      <div class="input-group"><label>24 Months RD</label><input type="number" step="0.25" class="rate-input" data-key="rd_24" value="${rates.rd_24}"></div>
-      <div class="input-group"><label>12 Months RD</label><input type="number" step="0.25" class="rate-input" data-key="rd_12" value="${rates.rd_12}"></div>
+      <div class="input-group"><label>36 Months RD</label><input type="number" step="0.25" class="rate-input" data-key="rd_36" value="${rates.rd_36?.value ?? 10}"></div>
+      <div class="input-group"><label>24 Months RD</label><input type="number" step="0.25" class="rate-input" data-key="rd_24" value="${rates.rd_24?.value ?? 9}"></div>
+      <div class="input-group"><label>12 Months RD</label><input type="number" step="0.25" class="rate-input" data-key="rd_12" value="${rates.rd_12?.value ?? 8}"></div>
     `;
   }
 
-  function saveAllRates() {
+  async function saveAllRates() {
     const newRates = {};
     document.querySelectorAll('.rate-input').forEach(inp => { newRates[inp.dataset.key] = parseFloat(inp.value); });
-    localStorage.setItem('dc_rates', JSON.stringify(newRates));
-    showToast('Interest rates updated successfully');
+    const res = await apiPostJson('rates.php', { rates: newRates });
+    if (res.success) showToast('Interest rates saved to database');
+    else showToast(res.error || 'Failed to save', true);
+  }
+
+  // --- NOTIFICATIONS ---
+  async function renderNotifications() {
+    const res = await apiGet('notifications.php');
+    const notifs = res.success ? res.notifications : [];
+    const container = document.getElementById('notificationList');
+    if(!container) return;
+    if(!notifs.length) { container.innerHTML = '<div class="alert-item">No active notifications</div>'; return; }
+    container.innerHTML = notifs.map((n) => `
+      <div class="alert-item" style="border-left-color: ${n.type==='success'?'#2e7d32': n.type==='alert'?'#d32f2f':'#1976d2'}">
+        <strong>📢 ${escapeHtml(n.title)}</strong>
+        <p style="margin-top:6px; font-size:13px">${escapeHtml(n.message)}</p>
+        <div style="margin-top:8px">
+          <button class="primary-btn" style="padding: 6px 12px; font-size: 11px" onclick="editNotification(${n.id}, '${escapeHtml(n.title).replace(/'/g, "\\'")}', '${escapeHtml(n.message).replace(/'/g, "\\'")}', '${n.type}')">Edit</button>
+          <button class="danger-btn" style="padding: 6px 12px; font-size: 11px" onclick="deleteNotification(${n.id})">Delete</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  window.editNotification = function(id, title, msg, type) {
+    document.getElementById('notifTitle').value = title;
+    document.getElementById('notifMsg').value = msg;
+    document.getElementById('notifType').value = type;
+    
+    const btn = document.querySelector('#page-notifications .primary-btn');
+    btn.innerHTML = '<i class="fas fa-save"></i> Update Alert';
+    btn.onclick = () => updateNotification(id);
+  }
+
+  async function updateNotification(id) {
+    const title = document.getElementById('notifTitle').value.trim();
+    const msg = document.getElementById('notifMsg').value.trim();
+    const type = document.getElementById('notifType').value;
+    
+    if(!title || !msg) { showToast('Title & message needed', true); return; }
+
+    const form = new FormData();
+    form.append('action', 'update');
+    form.append('id', id);
+    form.append('title', title);
+    form.append('message', msg);
+    form.append('type', type);
+
+    const res = await apiPost('notifications.php', form);
+    if (res.success) {
+      resetNotifForm();
+      renderNotifications();
+      showToast('Notification updated');
+    } else {
+      showToast(res.error || 'Failed', true);
+    }
+  }
+
+  function resetNotifForm() {
+    document.getElementById('notifTitle').value = '';
+    document.getElementById('notifMsg').value = '';
+    const btn = document.querySelector('#page-notifications .primary-btn');
+    btn.innerHTML = '<i class="fas fa-paper-plane"></i> Publish Alert';
+    btn.onclick = pushNotification;
+  }
+
+  async function pushNotification() {
+    const title = document.getElementById('notifTitle').value.trim();
+    const msg = document.getElementById('notifMsg').value.trim();
+    const type = document.getElementById('notifType').value;
+    if(!title || !msg) { showToast('Title & message needed', true); return; }
+
+    const form = new FormData();
+    form.append('action', 'create');
+    form.append('title', title);
+    form.append('message', msg);
+    form.append('type', type);
+
+    const res = await apiPost('notifications.php', form);
+    if (res.success) {
+      document.getElementById('notifTitle').value = '';
+      document.getElementById('notifMsg').value = '';
+      renderNotifications();
+      showToast('Notification published');
+    } else {
+      showToast(res.error || 'Failed', true);
+    }
+  }
+  window.deleteNotification = async function(id) {
+    const form = new FormData();
+    form.append('action', 'delete');
+    form.append('id', id);
+    await apiPost('notifications.php', form);
+    renderNotifications();
+    showToast('Notification deleted');
+  }
+
+  // --- DOCUMENTS ---
+  async function renderDocuments() {
+    const res = await apiGet('documents.php');
+    const docs = res.success ? res.documents : {};
+    const container = document.getElementById('documentsList');
+    if(!container) return;
+    const years = Object.keys(docs);
+    if(!years.length) { container.innerHTML = '<div class="card-panel">No documents uploaded.</div>'; return; }
+    container.innerHTML = years.sort().reverse().map(year => `
+      <div class="card-panel"><div class="panel-title"><i class="fas fa-calendar-alt"></i> ${year}</div>
+      <div class="table-wrapper"><table style="width:100%"><thead><tr><th>Document</th><th>Actions</th></tr></thead><tbody>
+        ${docs[year].map(doc => `<tr><td>📄 ${escapeHtml(doc.name)}</td><td>
+          <a href="../${doc.file_path}" target="_blank" class="danger-btn" style="text-decoration:none; background:#eef2ff; color:#1e3a5f">View</a> 
+          <button class="danger-btn" style="background:#fefce8; color:#854d0e" onclick="editDocument(${doc.id}, '${escapeHtml(doc.name).replace(/'/g, "\\'")}', '${year}')">Edit</button>
+          <button class="danger-btn" onclick="deleteDocument(${doc.id})">Remove</button>
+        </td></tr>`).join('')}
+      </tbody></table></div></div>
+    `).join('');
+  }
+
+  window.editDocument = function(id, name, year) {
+    document.getElementById('docLabel').value = name;
+    document.getElementById('docYear').value = year;
+    // Scroll to form
+    document.getElementById('page-documents').scrollIntoView({behavior: 'smooth'});
+    
+    const btn = document.querySelector('#page-documents .primary-btn');
+    btn.innerHTML = '<i class="fas fa-save"></i> Update Document Details';
+    btn.onclick = () => updateDocument(id);
+  }
+
+  async function updateDocument(id) {
+    const year = document.getElementById('docYear').value;
+    const label = document.getElementById('docLabel').value.trim();
+    if(!label) { showToast('Label required', true); return; }
+
+    const form = new FormData();
+    form.append('action', 'update');
+    form.append('id', id);
+    form.append('fiscal_year', year);
+    form.append('name', label);
+
+    const res = await apiPost('documents.php', form);
+    if (res.success) {
+      resetDocForm();
+      renderDocuments();
+      showToast('Document updated');
+    } else {
+      showToast(res.error || 'Update failed', true);
+    }
+  }
+
+  function resetDocForm() {
+    document.getElementById('docLabel').value = '';
+    document.getElementById('docFile').value = '';
+    const btn = document.querySelector('#page-documents .primary-btn');
+    btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Upload';
+    btn.onclick = uploadDocument;
+  }
+
+  async function uploadDocument() {
+    const year = document.getElementById('docYear').value;
+    const label = document.getElementById('docLabel').value.trim();
+    const files = document.getElementById('docFile').files;
+    if(!label || files.length === 0) { showToast('Label & files required', true); return; }
+
+    const form = new FormData();
+    form.append('action', 'upload');
+    form.append('fiscal_year', year);
+    form.append('name', label);
+    for (let i = 0; i < files.length; i++) {
+      form.append('files[]', files[i]);
+    }
+
+    const res = await apiPost('documents.php', form);
+    if (res.success) {
+      document.getElementById('docLabel').value = '';
+      document.getElementById('docFile').value = '';
+      renderDocuments();
+      showToast(res.message || 'Documents uploaded');
+    } else {
+      showToast(res.error || 'Upload failed', true);
+    }
+  }
+  window.deleteDocument = async (id) => {
+    const form = new FormData();
+    form.append('action', 'delete');
+    form.append('id', id);
+    await apiPost('documents.php', form);
+    renderDocuments();
+    showToast('Document deleted');
+  }
+
+  // --- GALLERY ---
+  async function renderGallery() {
+    const res = await apiGet('gallery.php');
+    const albums = res.success ? res.albums : [];
+    const grid = document.getElementById('galleryGrid');
+    if(!grid) return;
+    if(!albums.length) { grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px;">No albums yet.</div>'; return; }
+    grid.innerHTML = albums.map((alb) => `
+      <div class="gallery-card">
+        <img class="gallery-img" src="${alb.images.length ? '../'+alb.images[0].file_path : ''}" alt="${escapeHtml(alb.title)}">
+        <div class="gallery-info">
+          <div><strong>${escapeHtml(alb.title)}</strong><br><small>${alb.images.length} images</small></div>
+          <div style="display:flex; gap:5px">
+            <button class="danger-btn" style="background:#fefce8; color:#854d0e; padding:6px" onclick="editAlbum(${alb.id}, '${escapeHtml(alb.title).replace(/'/g, "\\'")}')"><i class="fas fa-edit"></i></button>
+            <button class="danger-btn" style="padding:6px" onclick="deleteAlbum(${alb.id})"><i class="fas fa-trash"></i></button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  window.editAlbum = function(id, title) {
+    document.getElementById('albumName').value = title;
+    document.getElementById('page-gallery').scrollIntoView({behavior: 'smooth'});
+    
+    const btn = document.querySelector('#page-gallery .primary-btn');
+    btn.innerHTML = '<i class="fas fa-save"></i> Update Album & Add Images';
+    btn.onclick = () => updateAlbum(id);
+  }
+
+  async function updateAlbum(id) {
+    const albumTitle = document.getElementById('albumName').value.trim();
+    const files = document.getElementById('albumImages').files;
+    
+    const form = new FormData();
+    form.append('action', 'update_album');
+    form.append('id', id);
+    form.append('title', albumTitle);
+    for (let i = 0; i < files.length; i++) {
+      form.append('images[]', files[i]);
+    }
+
+    const res = await apiPost('gallery.php', form);
+    if (res.success) {
+      resetGalleryForm();
+      renderGallery();
+      showToast(`Album updated`);
+    } else {
+      showToast(res.error || 'Failed', true);
+    }
+  }
+
+  function resetGalleryForm() {
+    document.getElementById('albumName').value = '';
+    document.getElementById('albumImages').value = '';
+    const btn = document.querySelector('#page-gallery .primary-btn');
+    btn.innerHTML = '<i class="fas fa-images"></i> Create Album';
+    btn.onclick = createAlbum;
+  }
+
+  async function createAlbum() {
+    const albumTitle = document.getElementById('albumName').value.trim();
+    const files = document.getElementById('albumImages').files;
+    if(!albumTitle || files.length === 0) { showToast('Album name and at least 1 image required', true); return; }
+
+    const form = new FormData();
+    form.append('action', 'create_album');
+    form.append('title', albumTitle);
+    for (let i = 0; i < files.length; i++) {
+      form.append('images[]', files[i]);
+    }
+
+    const res = await apiPost('gallery.php', form);
+    if (res.success) {
+      document.getElementById('albumName').value = '';
+      document.getElementById('albumImages').value = '';
+      renderGallery();
+      showToast(`Album "${albumTitle}" created`);
+    } else {
+      showToast(res.error || 'Failed', true);
+    }
+  }
+  window.deleteAlbum = async (id) => {
+    const form = new FormData();
+    form.append('action', 'delete_album');
+    form.append('id', id);
+    await apiPost('gallery.php', form);
+    renderGallery();
+    showToast('Album deleted');
+  }
+
+  // --- BUSINESSES ---
+  async function renderBusinesses() {
+    const res = await apiGet('businesses.php');
+    const biz = res.success ? res.businesses : [];
+    const container = document.getElementById('businessList');
+    if(!container) return;
+    if(!biz.length) { container.innerHTML = '<div class="alert-item">No businesses added.</div>'; return; }
+    container.innerHTML = `<div class="table-wrapper"><table>${biz.map((b) => `<tr>
+      <td>
+        <div style="display:flex; align-items:center; gap:15px">
+          <img src="../${b.image_path || 'assets/images/logo-english.png'}" style="width:50px; height:50px; object-fit:cover; border-radius:8px">
+          <div>
+            <span style="font-size:20px">${escapeHtml(b.icon || '🏢')}</span> <strong>${escapeHtml(b.name)}</strong><br>
+            <small>${escapeHtml(b.description?.substring(0, 50) || '')}...</small>
+          </div>
+        </div>
+      </td>
+      <td>
+        <button class="danger-btn" style="background:#fefce8; color:#854d0e" onclick="editBusiness(${b.id}, '${escapeHtml(b.name).replace(/'/g, "\\'")}', '${escapeHtml(b.icon || '🏢').replace(/'/g, "\\'")}', '${escapeHtml(b.features?.join(', ') || '').replace(/'/g, "\\'")}', '${escapeHtml(b.description || '').replace(/'/g, "\\'")}')">Edit</button>
+        <button class="danger-btn" onclick="deleteBusiness(${b.id})">Delete</button>
+      </td>
+    </tr>`).join('')}</table></div>`;
+  }
+
+  window.editBusiness = function(id, name, icon, features, description) {
+    document.getElementById('bizName').value = name;
+    document.getElementById('bizIcon').value = icon;
+    document.getElementById('bizFeatures').value = features;
+    document.getElementById('bizDesc').value = description;
+    document.getElementById('page-business').scrollIntoView({behavior: 'smooth'});
+    
+    const btn = document.querySelector('#page-business .primary-btn');
+    btn.innerHTML = '<i class="fas fa-save"></i> Update Service';
+    btn.onclick = () => updateBusiness(id);
+  }
+
+  async function updateBusiness(id) {
+    const name = document.getElementById('bizName').value.trim();
+    const icon = document.getElementById('bizIcon').value.trim();
+    const features = document.getElementById('bizFeatures').value;
+    const description = document.getElementById('bizDesc').value.trim();
+    const imageFile = document.getElementById('bizImage').files[0];
+    
+    if(!name) { showToast('Service name required', true); return; }
+
+    const form = new FormData();
+    form.append('action', 'update');
+    form.append('id', id);
+    form.append('name', name);
+    form.append('description', description);
+    form.append('icon', icon);
+    form.append('features', features);
+    if(imageFile) form.append('image', imageFile);
+
+    const res = await apiPost('businesses.php', form);
+    if (res.success) {
+      resetBizForm();
+      renderBusinesses();
+      showToast('Service updated');
+    } else {
+      showToast(res.error || 'Update failed', true);
+    }
+  }
+
+  function resetBizForm() {
+    document.getElementById('bizName').value = '';
+    document.getElementById('bizIcon').value = '';
+    document.getElementById('bizFeatures').value = '';
+    document.getElementById('bizDesc').value = '';
+    document.getElementById('bizImage').value = '';
+    const btn = document.querySelector('#page-business .primary-btn');
+    btn.innerHTML = '<i class="fas fa-plus"></i> Save Service';
+    btn.onclick = addBusinessService;
+  }
+
+  async function addBusinessService() {
+    const name = document.getElementById('bizName').value.trim();
+    const icon = document.getElementById('bizIcon').value.trim();
+    const description = document.getElementById('bizDesc').value.trim();
+    const featuresRaw = document.getElementById('bizFeatures').value;
+    const imageFile = document.getElementById('bizImage').files[0];
+    
+    if(!name) { showToast('Service name required', true); return; }
+
+    const form = new FormData();
+    form.append('action', 'create');
+    form.append('name', name);
+    form.append('description', description);
+    form.append('icon', icon || '📄');
+    form.append('features', featuresRaw);
+    if(imageFile) form.append('image', imageFile);
+
+    const res = await apiPost('businesses.php', form);
+    if (res.success) {
+      resetBizForm();
+      renderBusinesses();
+      showToast('Service added');
+    } else {
+      showToast(res.error || 'Failed', true);
+    }
+  }
+  window.deleteBusiness = async (id) => {
+    const form = new FormData();
+    form.append('action', 'delete');
+    form.append('id', id);
+    await apiPost('businesses.php', form);
+    renderBusinesses();
+    showToast('Business deleted');
+  }
+
+  // --- SETTINGS ---
+  async function updateAdminPassword() {
+    const newPass = document.getElementById('newAdminPass').value;
+    if(newPass.length < 5) { showToast('Password min 5 characters', true); return; }
+
+    const form = new FormData();
+    form.append('action', 'change_password');
+    form.append('new_password', newPass);
+
+    const res = await apiPost('auth.php', form);
+    if (res.success) {
+      showToast('Admin credentials updated');
+      document.getElementById('newAdminPass').value = '';
+    } else {
+      showToast(res.error || 'Failed', true);
+    }
+  }
+
+  // --- CONTACTS ---
+  async function renderContacts() {
+    const res = await apiGet('contacts.php');
+    const container = document.getElementById('contactsList');
+    if(!container) return;
+    if(!res.success || !res.contacts || !res.contacts.length) {
+      container.innerHTML = '<div class="card-panel">No contact submissions yet.</div>';
+      return;
+    }
+    container.innerHTML = `<div class="table-wrapper"><table style="width:100%"><thead><tr><th>Date</th><th>From</th><th>Contact</th><th>Message</th><th>Actions</th></tr></thead><tbody>
+      ${res.contacts.map(c => `<tr>
+        <td style="white-space:nowrap">${new Date(c.created_at).toLocaleDateString()}<br><small>${new Date(c.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</small></td>
+        <td><strong>${escapeHtml(c.name)}</strong></td>
+        <td><small>${escapeHtml(c.email)}</small><br>${escapeHtml(c.phone || '-')}</td>
+        <td><div style="max-width:300px; font-size:13px">${escapeHtml(c.message)}</div></td>
+        <td>
+          <button class="danger-btn" onclick="deleteContact(${c.id})"><i class="fas fa-trash"></i> Delete</button>
+        </td>
+      </tr>`).join('')}
+    </tbody></table></div>`;
+  }
+
+  window.deleteContact = async (id) => {
+    if(!confirm('Are you sure you want to delete this message?')) return;
+    const form = new FormData();
+    form.append('action', 'delete');
+    form.append('id', id);
+    const res = await apiPost('contacts.php', form);
+    if(res.success) {
+      showToast('Message deleted');
+      renderContacts();
+    } else {
+      showToast(res.error || 'Failed to delete', true);
+    }
+  }
+
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
   }
 
   function renderAllDynamicData() {
@@ -529,151 +1026,11 @@
     renderDocuments();
     renderGallery();
     renderBusinesses();
+    renderContacts();
   }
 
-  function renderNotifications() {
-    const notifs = JSON.parse(localStorage.getItem('dc_notifs') || '[]');
-    const container = document.getElementById('notificationList');
-    if(!container) return;
-    if(notifs.length === 0) { container.innerHTML = '<div class="alert-item">No active notifications</div>'; return; }
-    container.innerHTML = notifs.map((n, idx) => `
-      <div class="alert-item" style="border-left-color: ${n.type==='success'?'#2e7d32': n.type==='alert'?'#d32f2f':'#1976d2'}">
-        <strong>📢 ${n.title}</strong>
-        <p style="margin-top:6px; font-size:13px">${n.msg}</p>
-        <button class="danger-btn" style="margin-top:8px" onclick="deleteNotification(${idx})">Delete</button>
-      </div>
-    `).join('');
-  }
-
-  function pushNotification() {
-    const title = document.getElementById('notifTitle').value.trim();
-    const msg = document.getElementById('notifMsg').value.trim();
-    const type = document.getElementById('notifType').value;
-    if(!title || !msg) { showToast('Title & message needed', true); return; }
-    const notifs = JSON.parse(localStorage.getItem('dc_notifs') || '[]');
-    notifs.unshift({ title, msg, type, createdAt: Date.now() });
-    localStorage.setItem('dc_notifs', JSON.stringify(notifs));
-    document.getElementById('notifTitle').value = ''; document.getElementById('notifMsg').value = '';
-    renderNotifications();
-    showToast('Notification published');
-  }
-  window.deleteNotification = function(idx) {
-    let notifs = JSON.parse(localStorage.getItem('dc_notifs') || '[]');
-    notifs.splice(idx,1);
-    localStorage.setItem('dc_notifs', JSON.stringify(notifs));
-    renderNotifications();
-  }
-
-  function renderDocuments() {
-    const docs = JSON.parse(localStorage.getItem('dc_documents') || '[]');
-    const grouped = {};
-    docs.forEach(d => { if(!grouped[d.year]) grouped[d.year]=[]; grouped[d.year].push(d); });
-    const container = document.getElementById('documentsList');
-    if(!container) return;
-    if(!docs.length) { container.innerHTML = '<div class="card-panel">No documents uploaded.</div>'; return; }
-    container.innerHTML = Object.keys(grouped).sort().reverse().map(year => `
-      <div class="card-panel"><div class="panel-title"><i class="fas fa-calendar-alt"></i> ${year}</div>
-      <div class="table-wrapper"><table style="width:100%"><thead><tr><th>Document</th><th>Actions</th></tr></thead><tbody>
-        ${grouped[year].map(doc => `<tr><td>📄 ${doc.name}</td><td><button class="danger-btn" onclick="deleteDocument(${doc.id})">Remove</button></td></tr>`).join('')}
-      </tbody></table></div></div>
-    `).join('');
-  }
-
-  function uploadDocument() {
-    const year = document.getElementById('docYear').value;
-    const label = document.getElementById('docLabel').value.trim();
-    const file = document.getElementById('docFile').files[0];
-    if(!label || !file) { showToast('Label & file required', true); return; }
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const docs = JSON.parse(localStorage.getItem('dc_documents') || '[]');
-      docs.push({ id: Date.now(), year, name: label, data: e.target.result, type: file.type });
-      localStorage.setItem('dc_documents', JSON.stringify(docs));
-      document.getElementById('docLabel').value = ''; document.getElementById('docFile').value = '';
-      renderDocuments();
-      showToast('Document uploaded');
-    };
-    reader.readAsDataURL(file);
-  }
-  window.deleteDocument = (id) => {
-    let docs = JSON.parse(localStorage.getItem('dc_documents') || '[]');
-    docs = docs.filter(d => d.id !== id);
-    localStorage.setItem('dc_documents', JSON.stringify(docs));
-    renderDocuments();
-    showToast('Document deleted');
-  }
-
-  function renderGallery() {
-    const albums = JSON.parse(localStorage.getItem('dc_gallery') || '[]');
-    const grid = document.getElementById('galleryGrid');
-    if(!grid) return;
-    if(!albums.length) { grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px;">No albums yet.</div>'; return; }
-    grid.innerHTML = albums.map((alb, idx) => `
-      <div class="gallery-card"><img class="gallery-img" src="${alb.images[0]}" alt="${alb.title}"><div class="gallery-info"><strong>${alb.title}</strong><button class="danger-btn" onclick="deleteAlbum(${idx})"><i class="fas fa-trash"></i></button></div></div>
-    `).join('');
-  }
-
-  function createAlbum() {
-    const albumTitle = document.getElementById('albumName').value.trim();
-    const files = document.getElementById('albumImages').files;
-    if(!albumTitle || files.length === 0) { showToast('Album name and at least 1 image required', true); return; }
-    const albums = JSON.parse(localStorage.getItem('dc_gallery') || '[]');
-    let loaded = 0;
-    const imgDataArr = [];
-    Array.from(files).forEach(file => {
-      const rd = new FileReader();
-      rd.onload = (e) => { imgDataArr.push(e.target.result); loaded++; if(loaded === files.length) {
-        albums.unshift({ id: Date.now(), title: albumTitle, images: imgDataArr });
-        localStorage.setItem('dc_gallery', JSON.stringify(albums));
-        renderGallery();
-        showToast(`Album "${albumTitle}" created`);
-        document.getElementById('albumName').value = ''; document.getElementById('albumImages').value = '';
-      } };
-      rd.readAsDataURL(file);
-    });
-  }
-  window.deleteAlbum = (idx) => {
-    let albums = JSON.parse(localStorage.getItem('dc_gallery') || '[]');
-    albums.splice(idx,1);
-    localStorage.setItem('dc_gallery', JSON.stringify(albums));
-    renderGallery();
-  }
-
-  function renderBusinesses() {
-    const biz = JSON.parse(localStorage.getItem('dc_businesses') || '[]');
-    const container = document.getElementById('businessList');
-    if(!container) return;
-    if(biz.length === 0) { container.innerHTML = '<div class="alert-item">No businesses added.</div>'; return; }
-    container.innerHTML = `<div class="table-wrapper"><table>${biz.map((b, i) => `<tr><td><span style="font-size:24px">${b.icon || '🏢'}</span> <strong>${b.name}</strong><br><small>${b.features?.join(', ')}</small></td><td><button class="danger-btn" onclick="deleteBusiness(${i})">Delete</button></td></tr>`).join('')}</table></div>`;
-  }
-  function addBusinessService() {
-    const name = document.getElementById('bizName').value.trim();
-    const icon = document.getElementById('bizIcon').value.trim();
-    const featuresRaw = document.getElementById('bizFeatures').value;
-    if(!name) { showToast('Service name required', true); return; }
-    const bizList = JSON.parse(localStorage.getItem('dc_businesses') || '[]');
-    bizList.push({ name, icon: icon || '📄', features: featuresRaw.split(',').map(f => f.trim()).filter(f=>f) });
-    localStorage.setItem('dc_businesses', JSON.stringify(bizList));
-    document.getElementById('bizName').value = ''; document.getElementById('bizIcon').value = ''; document.getElementById('bizFeatures').value = '';
-    renderBusinesses();
-    showToast('Service added');
-  }
-  window.deleteBusiness = (idx) => {
-    let biz = JSON.parse(localStorage.getItem('dc_businesses') || '[]');
-    biz.splice(idx,1);
-    localStorage.setItem('dc_businesses', JSON.stringify(biz));
-    renderBusinesses();
-  }
-
-  function updateAdminPassword() {
-    const newPass = document.getElementById('newAdminPass').value;
-    if(newPass.length < 5) { showToast('Password min 5 characters', true); return; }
-    localStorage.setItem('dc_admin_creds', JSON.stringify({ user: 'admin', pass: newPass }));
-    showToast('Admin credentials updated');
-    document.getElementById('newAdminPass').value = '';
-  }
-
-  if (sessionStorage.getItem('dc_admin') === '1') initAdminApp();
+  // Check auth on page load
+  checkAuth();
 </script>
 <style>
   .admin-page { display: none; }

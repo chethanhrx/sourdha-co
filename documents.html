@@ -86,7 +86,7 @@
   </ul>
   <div style="display:flex;align-items:center;gap:10px">
     <a href="admin/" style="background:var(--grad-main);color:#fff;padding:6px 14px;border-radius:50px;font-size:12px;font-weight:600;text-decoration:none;display:none" id="adminLink">Admin</a>
-    <button class="hamburger" onclick="openMob()">☰</button>
+    <button class="hamburger" onclick="toggleMob()">☰</button>
   </div>
 </nav>
 
@@ -158,35 +158,44 @@ function fmtSize(bytes){
   return(bytes/1048576).toFixed(1)+' MB';
 }
 
+var allDocs = [];
+
 // View document
 function viewDoc(id){
-  var docs=JSON.parse(localStorage.getItem('dc_documents')||'[]');
-  var doc=docs.find(function(d){return d.id===id});
+  var doc=allDocs.find(function(d){return d.id==id});
   if(!doc)return;
   var w=window.open();
-  if(doc.type==='application/pdf'){
-    w.document.write('<iframe src="'+doc.data+'" style="width:100%;height:100%;border:none;position:fixed;inset:0"></iframe>');
+  if(doc.file_type==='application/pdf'){
+    w.document.write('<iframe src="'+doc.file_path+'" style="width:100%;height:100%;border:none;position:fixed;inset:0"></iframe>');
   }else{
-    w.document.write('<img src="'+doc.data+'" style="max-width:100%;margin:20px auto;display:block">');
+    w.document.write('<img src="'+doc.file_path+'" style="max-width:100%;margin:20px auto;display:block">');
   }
   w.document.title=doc.name;
 }
 
 // Download document
 function downloadDoc(id){
-  var docs=JSON.parse(localStorage.getItem('dc_documents')||'[]');
-  var doc=docs.find(function(d){return d.id===id});
+  var doc=allDocs.find(function(d){return d.id==id});
   if(!doc)return;
   var a=document.createElement('a');
-  a.href=doc.data;a.download=doc.name;a.click();
+  a.href=doc.file_path;a.download=doc.name;a.click();
 }
 
-// Render documents (view only — no upload, no delete)
-function renderDocs(){
+// Render documents from backend
+async function renderDocs(){
   var container=document.getElementById('docsContainer');
-  var docs=JSON.parse(localStorage.getItem('dc_documents')||'[]');
+  
+  try {
+    var res = await fetch('api/documents.php');
+    var data = await res.json();
+    var grouped = data.success ? data.documents : {};
+  } catch(e) { grouped = {}; }
 
-  if(!docs.length){
+  var sortedYears=Object.keys(grouped).sort(function(a,b){
+    return parseInt(b.split('-')[0])-parseInt(a.split('-')[0]);
+  });
+
+  if(!sortedYears.length){
     container.innerHTML='<div class="empty-state">'+
       '<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>'+
       '<p>ಯಾವುದೇ ದಾಖಲೆಗಳಿಲ್ಲ — No documents uploaded yet</p>'+
@@ -194,21 +203,11 @@ function renderDocs(){
     return;
   }
 
-  // Group by year
-  var grouped={};
-  docs.forEach(function(d){
-    if(!grouped[d.year])grouped[d.year]=[];
-    grouped[d.year].push(d);
-  });
-
-  // Sort years descending
-  var sortedYears=Object.keys(grouped).sort(function(a,b){
-    return parseInt(b.split('-')[0])-parseInt(a.split('-')[0]);
-  });
-
   var html='';
+  allDocs = [];
   sortedYears.forEach(function(year){
-    var yearDocs=grouped[year].sort(function(a,b){return new Date(b.uploadedAt)-new Date(a.uploadedAt)});
+    var yearDocs=grouped[year].sort(function(a,b){return new Date(b.created_at)-new Date(a.created_at)});
+    allDocs = allDocs.concat(yearDocs);
 
     html+='<div class="year-section"><div class="year-header">'+
       '<span class="year-badge">'+year+'</span>'+
@@ -217,20 +216,20 @@ function renderDocs(){
       '<div class="doc-grid">';
 
     yearDocs.forEach(function(doc){
-      var isPDF=doc.type==='application/pdf';
+      var isPDF=doc.file_type==='application/pdf';
       var preview=isPDF
         ?'<div class="pdf-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#C41E3A" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span class="pdf-label">PDF</span></div>'
-        :'<img src="'+doc.data+'" alt="'+doc.name+'" loading="lazy">';
+        :'<img src="'+doc.file_path+'" alt="'+doc.name+'" loading="lazy">';
 
-      var date=new Date(doc.uploadedAt);
+      var date=new Date(doc.created_at);
       var dateStr=date.toLocaleDateString('kn-IN',{day:'numeric',month:'short',year:'numeric'});
 
-      html+='<div class="doc-card"><div class="doc-preview" onclick="viewDoc(\''+doc.id+'\')">'+preview+'</div>'+
+      html+='<div class="doc-card"><div class="doc-preview" onclick="viewDoc('+doc.id+')">'+preview+'</div>'+
         '<div class="doc-info"><div class="doc-name" title="'+doc.name+'">'+doc.name+'</div>'+
-        '<div class="doc-meta"><span>'+dateStr+'</span><span class="doc-size">'+fmtSize(doc.size)+'</span></div>'+
+        '<div class="doc-meta"><span>'+dateStr+'</span><span class="doc-size">'+fmtSize(doc.file_size)+'</span></div>'+
         '<div class="doc-actions">'+
-        '<button class="doc-act" onclick="viewDoc(\''+doc.id+'\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> ನೋಡಿ</button>'+
-        '<button class="doc-act" onclick="downloadDoc(\''+doc.id+'\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> ↓</button>'+
+        '<button class="doc-act" onclick="viewDoc('+doc.id+')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> ನೋಡಿ</button>'+
+        '<button class="doc-act" onclick="downloadDoc('+doc.id+')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> ↓</button>'+
         '</div></div></div>';
     });
 

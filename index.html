@@ -65,7 +65,7 @@
       <a href="./admin/index.html"
         style="background:var(--grad-main);color:#fff;padding:6px 14px;border-radius:50px;font-size:12px;font-weight:600;text-decoration:none;display:none"
         id="adminLink">Admin</a>
-      <button class="hamburger" onclick="openMob()">☰</button>
+      <button class="hamburger" onclick="toggleMob()">☰</button>
     </div>
   </nav>
 
@@ -585,24 +585,42 @@
   </section>
 
   <script>
-    function renderHomeGallery() {
+    async function renderHomeGallery() {
       const container = document.getElementById('homeGalleryPreview');
-      const stored = localStorage.getItem('dc_gallery');
       if (!container) return;
-      if (!stored || JSON.parse(stored).length === 0) {
-        container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--text2)">ಫೋಟೋಗಳನ್ನು ಶೀಘ್ರದಲ್ಲೇ ಅಪ್‌ಲೋಡ್ ಮಾಡಲಾಗುವುದು. Photos coming soon.</div>';
-        return;
-      }
-      const albums = JSON.parse(stored);
-      let images = [];
-      albums.forEach(a => { images = images.concat(a.images.slice(0, 2)); });
-      const displayImages = images.slice(0, 4);
+      
+      try {
+        const res = await fetch('api/gallery.php');
+        const data = await res.json();
+        
+        if (!data.success || !data.albums || data.albums.length === 0) {
+          container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--text2)">ಫೋಟೋಗಳನ್ನು ಶೀಘ್ರದಲ್ಲೇ ಅಪ್‌ಲೋಡ್ ಮಾಡಲಾಗುವುದು. Photos coming soon.</div>';
+          return;
+        }
 
-      container.innerHTML = displayImages.map(img => `
-    <div style="aspect-ratio:4/3;overflow:hidden;border-radius:15px;box-shadow:var(--sh-md)">
-      <img src="${img}" style="width:100%;height:100%;object-fit:cover">
-    </div>
-  `).join('');
+        let images = [];
+        data.albums.forEach(a => { 
+          if (a.images && a.images.length > 0) {
+            // Take up to 2 images from each album for preview
+            images = images.concat(a.images.slice(0, 2).map(img => img.file_path)); 
+          }
+        });
+        
+        const displayImages = images.slice(0, 4);
+        if (displayImages.length === 0) {
+            container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--text2)">ಫೋಟೋಗಳನ್ನು ಶೀಘ್ರದಲ್ಲೇ ಅಪ್‌ಲೋಡ್ ಮಾಡಲಾಗುವುದು. Photos coming soon.</div>';
+            return;
+        }
+
+        container.innerHTML = displayImages.map(img => `
+          <div style="aspect-ratio:4/3;overflow:hidden;border-radius:15px;box-shadow:var(--sh-md)">
+            <img src="${img}" style="width:100%;height:100%;object-fit:cover" alt="Gallery Image">
+          </div>
+        `).join('');
+      } catch (e) {
+        console.error('Failed to load gallery:', e);
+        container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--text2)">Error loading photos.</div>';
+      }
     }
     window.addEventListener('load', renderHomeGallery);
   </script>
