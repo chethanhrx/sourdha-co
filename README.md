@@ -57,7 +57,7 @@ The official web platform for **Divyachethana Souhardha Sahakari Sangha Niyamith
 ### Installation
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/yourusername/divyachethana.git
+    git clone https://github.com/chethanhrx/souharda-co.git
     ```
 2.  **Database Setup:**
     - Open phpMyAdmin.
